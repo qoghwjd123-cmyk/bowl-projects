@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#2563eb">
+<title>보울 프로젝트</title>
+<!--
+==================== 설정 방법 ====================
+1) Firebase 콘솔 > 프로젝트 만들기 > 웹 앱 추가 > firebaseConfig 값을 아래 FIREBASE_CONFIG에 붙여넣기
+2) Authentication > 로그인 방법 > Google 사용 설정
+   Authentication > 설정 > 승인된 도메인에 GitHub Pages 도메인(예: 아이디.github.io) 추가
+3) Firestore Database 생성 후 규칙(Rules)에 아래를 붙여넣기 (이메일은 본인 구글 계정으로 교체)
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /projects/{id} {
+      allow read, write: if request.auth != null
+                         && request.auth.token.email == "본인@gmail.com";
+    }
+  }
+}
+
+4) 아래 ALLOWED_EMAIL에도 같은 이메일을 넣기 (화면 차단용, 실제 보안은 위 규칙이 담당)
+5) GitHub 저장소에 index.html로 올리고 Pages 켜기
+FIREBASE_CONFIG를 비워두면 '체험 모드'로 동작합니다 (이 브라우저에만 저장).
+=====================================================
+-->
+<style>
+:root{--bg:#f6f6f4;--card:#fff;--tx:#1f2328;--mu:#6b7280;--bd:#e4e4e0;--ac:#2563eb;--acbg:#e8efff;--danger:#dc2626}
+@media(prefers-color-scheme:dark){:root{--bg:#141618;--card:#1d2023;--tx:#e8eaed;--mu:#9aa0a6;--bd:#2c3034;--ac:#6ea0ff;--acbg:#1f2a44;--danger:#f87171}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--tx);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;-webkit-text-size-adjust:100%}
+#app{max-width:1100px;margin:0 auto;padding:0 16px calc(40px + env(safe-area-inset-bottom))}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+input,select,textarea{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:9px 11px;width:100%;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--ac)}
+.muted{color:var(--mu);font-size:13px}
+.bar{display:flex;align-items:center;gap:10px;padding:14px 0;position:sticky;top:0;background:var(--bg);z-index:5}
+.bar h1{font-size:19px;margin:0;flex:1}
+.btn{border:0;background:var(--ac);color:#fff;border-radius:10px;padding:9px 14px;font-weight:600;white-space:nowrap}
+.ghost{border:1px solid var(--bd);background:var(--card);border-radius:10px;padding:8px 12px}
+.danger{color:var(--danger)}
+.tabs{display:flex;gap:6px;margin:2px 0 14px;overflow-x:auto}
+.tabs a,.tabs button{padding:7px 14px;border-radius:999px;border:1px solid var(--bd);background:var(--card);color:var(--tx);text-decoration:none;white-space:nowrap;font-size:14px}
+.tabs .on{background:var(--ac);border-color:var(--ac);color:#fff}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.stat{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px 14px}
+.stat small{display:block;color:var(--mu);font-size:12px}
+.stat b{font-size:17px}
+.filters{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.filters input[type=search]{flex:1;min-width:140px}
+.filters select{width:auto}
+.filters label{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--mu);white-space:nowrap}
+.filters input[type=checkbox]{width:auto}
+.list{display:flex;flex-direction:column;gap:8px}
+.row{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px 14px;text-decoration:none;color:inherit}
+.row:active{background:var(--acbg)}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.rn{flex:1;min-width:0}
+.rn b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rn small{color:var(--mu)}
+.amt{text-align:right;font-size:13px;color:var(--mu);white-space:nowrap}
+.chip{display:inline-block;font-size:12px;padding:1px 8px;border-radius:999px;background:var(--acbg);color:var(--ac);margin-right:4px}
+.board{display:flex;gap:12px;overflow-x:auto;padding-bottom:12px;scroll-snap-type:x proximity}
+.col{flex:1 0 250px;min-width:250px;background:color-mix(in srgb,var(--bd) 45%,transparent);border-radius:14px;padding:10px;scroll-snap-align:start}
+.col h3{margin:2px 4px 10px;font-size:14px;display:flex;align-items:center;gap:8px}
+.col.over{outline:2px dashed var(--ac)}
+.kcard{display:block;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;margin-bottom:8px;text-decoration:none;color:inherit}
+.kcard b{display:block;margin-bottom:2px}
+.empty{text-align:center;padding:36px 12px;color:var(--mu);border:1px dashed var(--bd);border-radius:14px}
+.title{font-size:19px;font-weight:700;border:0;background:transparent;padding:6px 4px}
+.metarow{display:flex;gap:8px;margin-bottom:12px}
+.metarow>*{flex:1}
+.pane{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px}
+textarea.notes{min-height:52vh;resize:vertical;line-height:1.7;border:0;padding:2px;background:transparent}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label.f{display:block;font-size:12px;color:var(--mu)}
+label.f input,label.f textarea{margin-top:4px;color:var(--tx);font-size:15px}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
+.sum div{background:var(--bg);border-radius:12px;padding:10px 12px;min-width:0;overflow-wrap:anywhere}
+@media(max-width:640px){.sum b{font-size:14px}.sum div{padding:8px 10px}}
+.sum small{display:block;color:var(--mu);font-size:12px}
+.sum b{font-size:16px}
+h4{margin:16px 0 8px;font-size:14px}
+.erow{display:grid;grid-template-columns:1fr 130px 36px;gap:6px;margin-bottom:6px}
+.lrow{display:grid;grid-template-columns:120px 1fr 36px 36px;gap:6px;margin-bottom:6px}
+.x{border:1px solid var(--bd);background:var(--card);border-radius:10px}
+.banner{background:#fff7e0;color:#7a5b00;border-radius:10px;padding:8px 12px;font-size:13px;margin-top:8px}
+@media(prefers-color-scheme:dark){.banner{background:#3a3115;color:#f4d27a}}
+.login{min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center}
+@media(max-width:640px){
+  .cards{grid-template-columns:repeat(2,1fr)}
+  .lrow{grid-template-columns:1fr 36px 36px}
+  .lrow input:first-child{grid-column:1/-1}
+  .erow{grid-template-columns:1fr 110px 36px}
+  .col{flex-basis:78vw;min-width:78vw}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script type="module">
+/* ================= 설정 ================= */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCAWMarH4esiWVb4p69EFamFWPO_t0riiQ",
+  authDomain: "mediabowl-6d1a5.firebaseapp.com",
+  projectId: "mediabowl-6d1a5",
+  storageBucket: "mediabowl-6d1a5.firebasestorage.app",
+  messagingSenderId: "26942835440",
+  appId: "1:26942835440:web:a576eed2f8faf364501035"
+};
+const ALLOWED_EMAIL = ""; // 본인 구글 이메일 (비워두면 모든 구글 계정 로그인 허용 → Firestore 규칙으로 꼭 잠글 것)
+/* ======================================== */
+
+const USE_FIREBASE = !!FIREBASE_CONFIG.apiKey;
+const STATUSES = ["Pre", "Production", "Post", "Done"];
+const SCOL = { Pre: "#8a8f98", Production: "#3b82f6", Post: "#f59e0b", Done: "#22c55e" };
+const LISTORD = { Production: 0, Post: 1, Pre: 2, Done: 3 };
+const NUM = ["contract", "received"];
+
+/* 노션 'Bowl 2026 Project List' 초기 데이터: [이름, 분류, 상태, 시작, 마감, 납기] */
+const SEED = [
+  ["알몸마라톤 티저","꼭대기","Done","2026-01-05","","2026-01-07"],
+  ["윈터700","윈터700","Production","","",""],
+  ["청년마을","꼭대기","Production","2026-01-05","",""],
+  ["태학이형 시즌영상","보울","Production","2026-01-15","",""],
+  ["꼭대기 운동마을 유튜브 기획","꼭대기","Production","","",""],
+  ["알몸 마라톤","꼭대기","Done","2026-02-14","2026-02-14","2026-02-16"],
+  ["로펫","","Done","","",""],
+  ["미탄 아웃도어 빌리지_펨투어","꼭대기","Done","","",""],
+  ["조각필름","","Production","","",""],
+  ["클래식한 형들의 옷장","","Pre","","",""],
+  ["SNK 2026","보울","Done","2026-05-26","2026-06-18","2026-06-15"],
+  ["제주 오디션","","Done","","",""],
+  ["서울창경","","Done","","",""],
+  ["강원랜드 도박방지","","Done","","",""],
+  ["휠로그 제안서","","Done","","",""],
+  ["온기잇다_기억되게 하기","보울","Done","2026-08-11","2026-09-12",""],
+  ["k - local","","Done","","",""],
+  ["지은이 컨설팅","","Production","","",""],
+  ["온기잇다_ep2.호스피스","","Pre","","",""],
+  ["소상공인 도약지원 메가쇼_일산","","Pre","","",""],
+  ["26모두의창업","","Pre","","",""]
+];
+
+/* ================= 유틸 ================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const won = n => (Number(n) || 0).toLocaleString("ko-KR") + "원";
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2));
+const md = d => d ? `${+d.slice(5, 7)}/${+d.slice(8, 10)}` : "";
+const todayStr = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+const sumExp = p => (p.expenses || []).reduce((a, e) => a + (Number(e.a) || 0), 0);
+const margin = p => (Number(p.contract) || 0) - sumExp(p);
+const unpaid = p => Math.max(0, (Number(p.contract) || 0) - (Number(p.received) || 0));
+const mk = ([name, category, status, start, end, due]) => ({
+  id: uid(), name, category, status, start, end, due,
+  contract: "", received: "", expenses: [], links: [], notes: "", contact: "",
+  createdAt: Date.now(), updatedAt: Date.now()
+});
+
+/* ================= 저장소 ================= */
+function localStore() {
+  const LK = "bowl_projects_v1";
+  let arr = JSON.parse(localStorage.getItem(LK) || "[]"), cb = () => {};
+  const commit = () => { localStorage.setItem(LK, JSON.stringify(arr)); cb([...arr]); };
+  return {
+    mode: "local",
+    onAuth(f) { f({ email: "체험 모드" }); },
+    listen(f) { cb = f; f([...arr]); },
+    async save(p) { const i = arr.findIndex(x => x.id === p.id); i < 0 ? arr.push(p) : (arr[i] = p); commit(); },
+    async remove(id) { arr = arr.filter(x => x.id !== id); commit(); },
+    async seed(items) { arr.push(...items); commit(); },
+    signIn() {}, signOut() {}
+  };
+}
+
+async function firebaseStore() {
+  const B = "https://www.gstatic.com/firebasejs/10.14.1/";
+  const [A, Au, Fs] = await Promise.all([
+    import(B + "firebase-app.js"), import(B + "firebase-auth.js"), import(B + "firebase-firestore.js")
+  ]);
+  const app = A.initializeApp(FIREBASE_CONFIG);
+  const auth = Au.getAuth(app);
+  const db = Fs.initializeFirestore(app, { localCache: Fs.persistentLocalCache() });
+  const col = Fs.collection(db, "projects");
+  let unsub = null;
+  return {
+    mode: "firebase",
+    onAuth(f) {
+      Au.onAuthStateChanged(auth, u => {
+        if (u && ALLOWED_EMAIL && u.email !== ALLOWED_EMAIL) { Au.signOut(auth); alert("허용되지 않은 계정이에요."); return; }
+        if (!u && unsub) { unsub(); unsub = null; }
+        f(u);
+      });
+    },
+    listen(f) { if (unsub) unsub(); unsub = Fs.onSnapshot(col, s => f(s.docs.map(d => ({ ...d.data(), id: d.id })))); },
+    save: p => Fs.setDoc(Fs.doc(db, "projects", p.id), p),
+    remove: id => Fs.deleteDoc(Fs.doc(db, "projects", id)),
+    async seed(items) { const b = Fs.writeBatch(db); items.forEach(p => b.set(Fs.doc(db, "projects", p.id), p)); await b.commit(); },
+    signIn: () => Au.signInWithPopup(auth, new Au.GoogleAuthProvider()),
+    signOut: () => Au.signOut(auth)
+  };
+}
+
+/* ================= 상태 ================= */
+const app = $("#app");
+let store, user = null, projects = [], ready = false;
+const F = { q: "", cat: "", showDone: false };
+let detailTab = "notes";
+const pending = new Map();
+let saveTimer = null;
+
+function persist(p) {
+  p.updatedAt = Date.now();
+  pending.set(p.id, p);
+  const s = $("#saved"); if (s) s.textContent = "저장 중…";
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(flush, 700);
+}
+function flush() {
+  clearTimeout(saveTimer);
+  pending.forEach(p => store.save(p));
+  pending.clear();
+  const s = $("#saved"); if (s) s.textContent = "저장됨";
+}
+addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flush(); });
+addEventListener("pagehide", flush);
+
+const routeId = () => { const m = location.hash.match(/^#\/p\/(.+)$/); return m ? m[1] : null; };
+const cur = () => { const id = routeId(); return id ? projects.find(p => p.id === id) : null; };
+
+/* ================= 렌더: 로그인 ================= */
+function renderLogin() {
+  app.innerHTML = `<div class="login"><h1>보울 프로젝트</h1><p class="muted">Google 계정으로 로그인하세요</p>
+  <button class="btn" data-act="login">Google로 로그인</button></div>`;
+}
+
+/* ================= 렌더: 메인 ================= */
+function render() {
+  if (!user) return renderLogin();
+  const id = routeId();
+  if (id) return renderDetail(id);
+  renderMain();
+}
+
+function renderMain() {
+  const board = location.hash === "#/board";
+  const cats = [...new Set(projects.map(p => p.category).filter(Boolean))];
+  app.innerHTML = `
+  <div class="bar"><h1>보울 프로젝트</h1>
+    <button class="btn" data-act="new">+ 새 프로젝트</button>
+    <button class="ghost" data-act="logout" title="${esc(user.email || "")}">⎋</button></div>
+  ${store.mode === "local" ? `<div class="banner" style="margin:0 0 12px">체험 모드: 이 브라우저에만 저장돼요. Firebase 설정을 넣으면 폰·PC가 동기화됩니다.</div>` : ""}
+  <div class="tabs"><a href="#/" class="${board ? "" : "on"}">목록</a><a href="#/board" class="${board ? "on" : ""}">보드</a></div>
+  <div id="stats"></div>
+  <div class="filters">
+    <input type="search" id="q" placeholder="프로젝트 검색" value="${esc(F.q)}">
+    <select id="fcat"><option value="">전체 분류</option>${cats.map(c => `<option ${F.cat === c ? "selected" : ""}>${esc(c)}</option>`).join("")}</select>
+    <label><input type="checkbox" id="fdone" ${F.showDone ? "checked" : ""}> 완료 포함</label>
+  </div>
+  <div id="content"></div>`;
+  renderContent();
+}
+
+function filtered() {
+  const q = F.q.toLowerCase();
+  return projects.filter(p =>
+    (F.showDone || p.status !== "Done") &&
+    (!F.cat || p.category === F.cat) &&
+    (!q || (p.name + " " + (p.category || "")).toLowerCase().includes(q)));
+}
+
+function renderContent() {
+  const c = $("#content"); if (!c) return;
+  const board = location.hash === "#/board";
+  const all = projects;
+  const active = all.filter(p => p.status === "Production" || p.status === "Post").length;
+  $("#stats").innerHTML = `<div class="cards">
+    <div class="stat"><small>진행 중</small><b>${active}건</b></div>
+    <div class="stat"><small>계약 합계</small><b>${won(all.reduce((a, p) => a + (Number(p.contract) || 0), 0))}</b></div>
+    <div class="stat"><small>미수금</small><b>${won(all.reduce((a, p) => a + unpaid(p), 0))}</b></div>
+    <div class="stat"><small>마진 합계</small><b>${won(all.reduce((a, p) => a + (Number(p.contract) ? margin(p) : 0), 0))}</b></div></div>`;
+
+  if (!projects.length) {
+    c.innerHTML = `<div class="empty">아직 프로젝트가 없어요.<br><br>
+      <button class="btn" data-act="seed">노션 올해 목록 21건 불러오기</button></div>`;
+    return;
+  }
+  const list = filtered();
+  if (!list.length) { c.innerHTML = `<div class="empty">조건에 맞는 프로젝트가 없어요.</div>`; return; }
+
+  if (board) {
+    const cols = STATUSES.filter(s => F.showDone || s !== "Done");
+    c.innerHTML = `<div class="board">${cols.map(s => {
+      const items = list.filter(p => p.status === s).sort(byDate);
+      return `<div class="col" data-status="${s}"><h3><span class="dot" style="background:${SCOL[s]}"></span>${s} <span class="muted">${items.length}</span></h3>
+      ${items.map(p => `<a class="kcard" href="#/p/${p.id}" draggable="true" data-id="${p.id}"><b>${esc(p.name)}</b>
+        <small class="muted">${p.category ? `<span class="chip">${esc(p.category)}</span>` : ""}${p.due ? "납기 " + md(p.due) : ""}</small></a>`).join("")}</div>`;
+    }).join("")}</div>`;
+  } else {
+    list.sort((a, b) => (LISTORD[a.status] - LISTORD[b.status]) || byDate(a, b));
+    c.innerHTML = `<div class="list">${list.map(p => `<a class="row" href="#/p/${p.id}">
+      <span class="dot" style="background:${SCOL[p.status]}"></span>
+      <div class="rn"><b>${esc(p.name)}</b><small>${p.category ? `<span class="chip">${esc(p.category)}</span>` : ""}${p.status}${p.due ? " · 납기 " + md(p.due) : ""}</small></div>
+      <div class="amt">${Number(p.contract) ? won(p.contract) : ""}</div></a>`).join("")}</div>`;
+  }
+}
+const byDate = (a, b) => (a.due || a.start || "9999").localeCompare(b.due || b.start || "9999");
+
+/* ================= 렌더: 상세 ================= */
+function renderDetail(id) {
+  const p = projects.find(x => x.id === id);
+  if (!p) { app.innerHTML = `<div class="empty" style="margin-top:40px">프로젝트를 찾을 수 없어요.<br><br><button class="ghost" data-act="back">← 목록으로</button></div>`; return; }
+  const cats = [...new Set(projects.map(x => x.category).filter(Boolean))];
+  app.innerHTML = `
+  <div class="bar"><button class="ghost" data-act="back">←</button>
+    <input class="title" data-f="name" value="${esc(p.name)}" style="flex:1">
+    <span id="saved" class="muted"></span></div>
+  <div class="metarow">
+    <select data-f="status">${STATUSES.map(s => `<option ${p.status === s ? "selected" : ""}>${s}</option>`).join("")}</select>
+    <input data-f="category" list="catl" placeholder="분류 / 발주처" value="${esc(p.category)}">
+    <datalist id="catl">${cats.map(c => `<option value="${esc(c)}">`).join("")}</datalist>
+  </div>
+  <div class="tabs">
+    ${[["notes", "노트"], ["budget", "버짓"], ["info", "정보·링크"]].map(([k, l]) => `<button data-act="tab" data-t="${k}" class="${detailTab === k ? "on" : ""}">${l}</button>`).join("")}
+  </div>
+  <div class="pane" id="pane"></div>`;
+  renderPane(p);
+}
+
+function renderPane(p) {
+  const el = $("#pane"); if (!el) return;
+  document.querySelectorAll('[data-act="tab"]').forEach(b => b.classList.toggle("on", b.dataset.t === detailTab));
+  if (detailTab === "notes") {
+    el.innerHTML = `<div style="display:flex;justify-content:flex-end;margin-bottom:6px"><button class="ghost" data-act="today">+ 오늘 날짜</button></div>
+    <textarea class="notes" id="notes" data-f="notes" placeholder="미팅 기록, 콘티 아이디어, 클라이언트 피드백…">${esc(p.notes)}</textarea>`;
+  } else if (detailTab === "budget") {
+    el.innerHTML = `<div class="grid2">
+      <label class="f">계약금액(원)<input type="number" inputmode="numeric" data-f="contract" value="${p.contract ?? ""}"></label>
+      <label class="f">입금액(원)<input type="number" inputmode="numeric" data-f="received" value="${p.received ?? ""}"></label></div>
+    <div class="sum"><div><small>지출 합계</small><b id="b-exp"></b></div><div><small>마진</small><b id="b-margin"></b></div><div><small>미수금</small><b id="b-unpaid"></b></div></div>
+    <h4>지출 항목</h4><div id="exp"></div>
+    <datalist id="exl"><option value="외주비"><option value="장비 렌탈"><option value="출장비"><option value="식비"><option value="인건비"><option value="음악·폰트 라이선스"><option value="기타"></datalist>
+    <button class="ghost" data-act="addExp">+ 지출 추가</button>`;
+    renderExp(p); updateBudget(p);
+  } else {
+    el.innerHTML = `<div class="grid2" style="grid-template-columns:repeat(3,1fr)">
+      <label class="f">시작<input type="date" data-f="start" value="${esc(p.start)}"></label>
+      <label class="f">마감<input type="date" data-f="end" value="${esc(p.end)}"></label>
+      <label class="f">납기<input type="date" data-f="due" value="${esc(p.due)}"></label></div>
+    <h4>발주처 담당자·연락처</h4>
+    <textarea data-f="contact" rows="3" placeholder="담당자 / 연락처 / 메모">${esc(p.contact)}</textarea>
+    <h4>링크 (드라이브, 리뷰, 레퍼런스…)</h4><div id="lks"></div>
+    <button class="ghost" data-act="addLink">+ 링크 추가</button>
+    <div style="margin-top:28px;text-align:right"><button class="ghost danger" data-act="delProject">프로젝트 삭제</button></div>`;
+    renderLinks(p);
+  }
+}
+
+function renderExp(p) {
+  p.expenses ||= [];
+  $("#exp").innerHTML = p.expenses.map((e, i) => `<div class="erow">
+    <input list="exl" placeholder="항목" data-ek="n" data-i="${i}" value="${esc(e.n)}">
+    <input type="number" inputmode="numeric" placeholder="금액" data-ek="a" data-i="${i}" value="${e.a ?? ""}">
+    <button class="x" data-act="delExp" data-i="${i}">✕</button></div>`).join("") || `<div class="muted" style="margin-bottom:8px">지출 항목이 없어요.</div>`;
+}
+function renderLinks(p) {
+  p.links ||= [];
+  $("#lks").innerHTML = p.links.map((l, i) => `<div class="lrow">
+    <input placeholder="이름" data-lk="t" data-i="${i}" value="${esc(l.t)}">
+    <input placeholder="https://" inputmode="url" data-lk="u" data-i="${i}" value="${esc(l.u)}">
+    <button class="x" data-act="openLink" data-i="${i}">↗</button>
+    <button class="x" data-act="delLink" data-i="${i}">✕</button></div>`).join("") || `<div class="muted" style="margin-bottom:8px">링크가 없어요.</div>`;
+}
+function updateBudget(p) {
+  const e = $("#b-exp"); if (!e) return;
+  const has = Number(p.contract) > 0;
+  e.textContent = won(sumExp(p));
+  $("#b-margin").textContent = has ? `${won(margin(p))} (${Math.round(margin(p) / p.contract * 100)}%)` : "-";
+  $("#b-unpaid").textContent = has ? won(unpaid(p)) : "-";
+}
+
+/* ================= 이벤트 ================= */
+app.addEventListener("input", e => {
+  const t = e.target;
+  if (t.id === "q") { F.q = t.value; renderContent(); return; }
+  const p = cur(); if (!p) return;
+  if (t.dataset.f) {
+    const f = t.dataset.f;
+    p[f] = NUM.includes(f) ? (t.value === "" ? "" : Number(t.value)) : t.value;
+    if (NUM.includes(f)) updateBudget(p);
+    persist(p);
+  } else if (t.dataset.ek) {
+    const i = +t.dataset.i;
+    p.expenses[i][t.dataset.ek] = t.dataset.ek === "a" ? (Number(t.value) || 0) : t.value;
+    updateBudget(p); persist(p);
+  } else if (t.dataset.lk) {
+    p.links[+t.dataset.i][t.dataset.lk] = t.value; persist(p);
+  }
+});
+app.addEventListener("change", e => {
+  const t = e.target;
+  if (t.id === "fcat") { F.cat = t.value; renderContent(); }
+  else if (t.id === "fdone") { F.showDone = t.checked; renderContent(); }
+});
+
+app.addEventListener("click", async e => {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const act = b.dataset.act, p = cur(), i = +b.dataset.i;
+  if (act === "login") store.signIn();
+  else if (act === "logout") { flush(); if (confirm("로그아웃할까요?")) store.signOut(); }
+  else if (act === "back") { flush(); location.hash = "#/"; }
+  else if (act === "new") {
+    const name = prompt("프로젝트 이름"); if (!name || !name.trim()) return;
+    const np = mk([name.trim(), F.cat, "Pre", "", "", ""]);
+    projects.push(np); await store.save(np); detailTab = "notes"; location.hash = "#/p/" + np.id;
+  }
+  else if (act === "seed") { await store.seed(SEED.map(mk)); }
+  else if (act === "tab") { detailTab = b.dataset.t; if (p) renderPane(p); }
+  else if (!p) return;
+  else if (act === "today") {
+    const ta = $("#notes"); ta.value += (ta.value && !ta.value.endsWith("\n") ? "\n\n" : "") + `## ${todayStr()}\n`;
+    p.notes = ta.value; persist(p); ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length);
+  }
+  else if (act === "addExp") { p.expenses.push({ n: "", a: 0 }); renderExp(p); persist(p); }
+  else if (act === "delExp") { p.expenses.splice(i, 1); renderExp(p); updateBudget(p); persist(p); }
+  else if (act === "addLink") { p.links.push({ t: "", u: "" }); renderLinks(p); persist(p); }
+  else if (act === "delLink") { p.links.splice(i, 1); renderLinks(p); persist(p); }
+  else if (act === "openLink") {
+    let u = (p.links[i].u || "").trim(); if (!u) return;
+    if (!/^https?:\/\//i.test(u)) u = "https://" + u;
+    window.open(u, "_blank", "noopener");
+  }
+  else if (act === "delProject") {
+    if (!confirm(`'${p.name}' 프로젝트를 삭제할까요? 되돌릴 수 없어요.`)) return;
+    pending.delete(p.id); projects = projects.filter(x => x.id !== p.id);
+    await store.remove(p.id); location.hash = "#/";
+  }
+});
+
+/* 보드 드래그앤드롭 (데스크톱) */
+let dragId = null;
+app.addEventListener("dragstart", e => { const c = e.target.closest(".kcard"); if (c) { dragId = c.dataset.id; e.dataTransfer.effectAllowed = "move"; } });
+app.addEventListener("dragover", e => { const c = e.target.closest(".col"); if (c && dragId) { e.preventDefault(); document.querySelectorAll(".col.over").forEach(x => x !== c && x.classList.remove("over")); c.classList.add("over"); } });
+app.addEventListener("drop", e => {
+  const c = e.target.closest(".col"); if (!c || !dragId) return;
+  e.preventDefault();
+  const p = projects.find(x => x.id === dragId);
+  if (p && p.status !== c.dataset.status) { p.status = c.dataset.status; persist(p); flush(); }
+  dragId = null; renderContent();
+});
+app.addEventListener("dragend", () => { dragId = null; document.querySelectorAll(".col.over").forEach(x => x.classList.remove("over")); });
+
+addEventListener("hashchange", () => { flush(); render(); });
+
+/* ================= 시작 ================= */
+function onData(list) {
+  projects = list.map(x => pending.get(x.id) || x);
+  projects.forEach(p => { p.expenses ||= []; p.links ||= []; });
+  if (!ready) { ready = true; render(); return; }
+  if (routeId()) return;           // 상세 화면에서는 입력 중 깜빡임 방지
+  if ($("#content")) renderContent(); else render();
+}
+
+(async () => {
+  app.innerHTML = `<div class="login"><span class="muted">불러오는 중…</span></div>`;
+  try { store = USE_FIREBASE ? await firebaseStore() : localStore(); }
+  catch (err) { app.innerHTML = `<div class="empty" style="margin-top:40px">Firebase를 불러오지 못했어요.<br>${esc(err.message)}</div>`; return; }
+  store.onAuth(u => {
+    user = u; ready = false;
+    if (!u) { projects = []; renderLogin(); return; }
+    store.listen(onData);
+  });
+})();
+</script>
+</body>
+</html>
