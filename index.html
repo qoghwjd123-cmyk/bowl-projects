@@ -134,7 +134,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .row{min-height:56px;padding-top:12px;padding-bottom:12px;border-top:1px solid var(--line);text-decoration:none;color:inherit}
 .lh+.row{border-top:0}
 .row:hover{background:#fafbfc}
-.m{display:contents}
+.m,.m2{display:contents}
+.cd{display:none}
 .c-n{order:1;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .c-cat{order:2}
 .c-s{order:3;display:inline-flex;align-items:center;gap:8px;font-size:13.5px}
@@ -157,6 +158,48 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 
 /* iOS 입력 시 자동 확대 방지: 입력창 글자 16px 이상 */
 @media (max-width:900px){input,select,textarea{font-size:16px!important}}
+
+/* 세금 */
+.tx-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:26px}
+.tx-card{background:var(--panel);border-radius:16px;padding:20px 22px;border-top:4px solid var(--brand)}
+.tx-card.h2{border-top-color:var(--sun)}
+.tx-card h3{margin:0 0 14px;font-size:15px;font-weight:600;color:var(--mu)}
+.tx-card h3 b{color:var(--ink);font-size:17px;margin-right:6px}
+.tx-vat{font-family:var(--num);font-size:clamp(28px,3.4vw,38px);font-weight:700;white-space:nowrap;line-height:1.1}
+.tx-vat small{font-size:14px;font-weight:500;color:var(--mu);margin-left:4px}
+.tx-lbl{font-size:13px;color:var(--mu);margin-bottom:6px}
+.tx-sub{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.tx-sub small{display:block;font-size:12.5px;color:var(--mu);margin-bottom:3px}
+.tx-sub b{font-family:var(--num);font-size:15px;white-space:nowrap}
+.tx-sec{margin:0 0 26px}
+.tx-sec h3{margin:0 0 12px;font-size:17px}
+.tx-r{display:grid;grid-template-columns:4rem repeat(3,minmax(0,1fr)) 3.5rem;column-gap:14px;align-items:center;padding:0 20px;min-height:48px;border-top:1px solid var(--line);list-style:none;cursor:pointer}
+.tx-h{height:40px;background:var(--soft);font-size:12.5px;color:var(--mu);cursor:default;border-top:0}
+.tx-r.tx-h span:nth-child(n+2),.tx-r .num{text-align:right}
+.tx-r .mo{font-weight:700}
+.tx-r .num{font-family:var(--num);font-variant-numeric:tabular-nums;font-size:14px}
+.tx-r .num.zero{color:var(--mu);opacity:.6}
+.tx-r .num.v{font-weight:700;color:var(--brand)}
+.tx-r::-webkit-details-marker{display:none}
+.tx-r:not(.tx-h):hover{background:#fafbfc}
+.tx-t{background:var(--soft);font-weight:700;cursor:default}
+.tx-d{background:#fafbfc;border-top:1px solid var(--line);padding:6px 20px 10px}
+.tx-d a{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:9px 0;text-decoration:none;color:inherit;font-size:14px;border-top:1px dashed var(--line)}
+.tx-d a:first-child{border-top:0}
+.tx-d .amt{text-align:right;font-family:var(--num);font-variant-numeric:tabular-nums;white-space:nowrap;display:flex;gap:16px}
+.tx-d .amt em{font-style:normal;color:var(--brand);font-weight:700}
+.tx-d .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tx-note{font-size:13px;color:var(--mu);line-height:1.6;margin:0 0 6px}
+@media (max-width:760px){
+  .tx-cards{grid-template-columns:1fr;gap:10px}
+  .tx-r{grid-template-columns:3rem minmax(0,1fr) minmax(0,1fr);padding:0 16px;column-gap:10px}
+  .tx-r .tot,.tx-r .cnt{display:none}
+  .tx-h span:nth-child(4),.tx-h span:nth-child(5){display:none}
+  .tx-d{padding:4px 16px 8px}
+  .tx-d a{font-size:13.5px;gap:10px}
+  .tx-d .amt{flex-direction:column;gap:0;align-items:flex-end}
+  .tx-d .amt span{color:var(--mu);font-size:12.5px;order:2}
+}
 
 /* 빠른 추가 */
 .qa{background:var(--panel);border-radius:14px;padding:14px 16px;margin:0 0 30px;display:grid;grid-template-columns:minmax(0,1fr) 7rem 7rem 9.5rem 7rem auto;gap:10px;align-items:end}
@@ -292,14 +335,22 @@ h4{margin:18px 0 8px;font-size:14px;font-weight:600}
   .hk:not(.main) .s{grid-column:1/-1;margin-top:2px}
   .sec-h{flex-direction:column;align-items:flex-start}
   .lh{display:none}
-  .row{grid-template-columns:minmax(0,1fr) auto;row-gap:6px;padding:14px 16px}
-  .m{display:flex;flex-wrap:wrap;gap:2px 14px;grid-column:1/-1;order:3;font-size:12.5px;color:var(--mu)}
-  .c-n{order:0}.c-s{order:1}
+  .row{grid-template-columns:minmax(0,1fr) auto auto;row-gap:6px;column-gap:10px;padding:14px 16px;align-items:center}
+  .m{display:contents}
+  .c-cat{display:none}
+  .c-n{order:0;grid-column:1;grid-row:1;font-size:16px}
+  .cd{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:9px;vertical-align:1px;flex:none}
+  .cdn{background:transparent}.cd0{background:#3552d1}.cd1{background:#ff6b57}.cd2{background:#12a594}
+  .c-set{order:1;grid-column:2;grid-row:1;text-align:right}
+  .c-s{order:2;grid-column:3;grid-row:1;font-weight:600;font-size:13.5px;width:3.6em;text-align:right;justify-content:flex-end}
+  .m2{display:flex;flex-wrap:wrap;align-items:center;gap:2px 14px;padding-left:19px;grid-column:1/-1;grid-row:2;order:3;font-size:12.5px;color:var(--mu)}
+  .m2 .c{order:1}
+  .st-진행중{color:var(--brand)}.st-완료{color:var(--mu)}
+  .c-s .dot,.c-s::before{display:none}
   .c::before{display:inline;content:attr(data-l) " ";color:var(--mu);opacity:.8}
-  .c-cat::before,.c-amt::before,.c-set::before{content:""}
+  .c-cat::before,.c-amt::before,.c-set::before,.c-s::before,.c-n::before{content:""}
   .c.e{display:none}
-  .c-amt{text-align:left;font-size:12.5px}
-  .c-set{text-align:left}
+  .c-amt{text-align:left;font-size:12.5px;color:var(--ink);font-weight:600}
   .grid4{grid-template-columns:1fr 1fr}
   .lrow{grid-template-columns:1fr 38px 38px}
   .lrow input:first-child{grid-column:1/-1}
@@ -474,6 +525,43 @@ function render() {
 }
 
 const isMonthly = () => location.hash === "#/monthly";
+const isTax = () => location.hash === "#/tax";
+function taxHTML() {
+  const years = [...new Set([...projects.map(yearOf), CUR])].sort((a, b) => b - a);
+  const yr = F.year || CUR;
+  const yp = projects.filter(p => yearOf(p) === yr && Number(p.contract) > 0);
+  const mOf = p => +((p.start || p.due || regOf(p) || "").slice(5, 7)) || 0;
+  const vat = p => Math.round((Number(p.contract) || 0) * 0.1);
+  const sum = ps => ({ c: ps.reduce((t, p) => t + (Number(p.contract) || 0), 0), v: ps.reduce((t, p) => t + vat(p), 0), n: ps.length });
+  const z = v => v ? won(v) : "–";
+  const halves = [{ k: "h1", name: "상반기", lab: "1~6월", from: 1, to: 6 }, { k: "h2", name: "하반기", lab: "7~12월", from: 7, to: 12 }].map(h => {
+    const ps = yp.filter(p => mOf(p) >= h.from && mOf(p) <= h.to);
+    const months = Array.from({ length: h.to - h.from + 1 }, (_, i) => { const m = h.from + i, mp = ps.filter(p => mOf(p) === m).sort(byDate); return { m, ps: mp, ...sum(mp) }; });
+    return { ...h, ps, ...sum(ps), months };
+  });
+  const all = sum(yp);
+  return `
+  <div class="mv-h"><h2>${yr}년 부가세</h2>
+    <select id="fyear" aria-label="연도">${years.map(y => `<option value="${y}" ${yr === y ? "selected" : ""}>${y}년</option>`).join("")}</select></div>
+  <p class="tx-note">계약금액(버짓)은 부가세 별도 기준이라 부가세는 계약금액의 10%로 계산해요. 프로젝트의 시작일(없으면 납기, 등록일) 기준으로 월을 나눠요.</p>
+  <div class="tx-cards" style="margin-top:16px">
+    ${halves.map(h => `<div class="tx-card ${h.k}">
+      <h3><b>${h.name}</b>${h.lab} · ${h.n}건</h3>
+      <div class="tx-lbl">부가세 (10%)</div>
+      <div class="tx-vat">${nf(h.v)}<small>원</small></div>
+      <div class="tx-sub"><div><small>공급가액 (계약금액)</small><b>${won(h.c)}</b></div><div><small>합계 (부가세 포함)</small><b>${won(h.c + h.v)}</b></div></div>
+    </div>`).join("")}
+  </div>
+  ${halves.map(h => `<section class="tx-sec"><h3>${h.name} ${h.lab}</h3>
+    <div class="mtbl">
+      <div class="tx-r tx-h"><span>월</span><span>공급가액</span><span>부가세</span><span class="tot">합계</span><span class="cnt">건수</span></div>
+      ${h.months.map(r => `<details><summary class="tx-r"><span class="mo">${r.m}월</span><span class="num ${r.c ? "" : "zero"}">${z(r.c)}</span><span class="num v ${r.v ? "" : "zero"}">${z(r.v)}</span><span class="num tot ${r.c ? "" : "zero"}">${z(r.c + r.v)}</span><span class="num cnt ${r.n ? "" : "zero"}">${r.n || "–"}</span></summary>
+        ${r.ps.length ? `<div class="tx-d">${r.ps.map(p => `<a href="#/p/${p.id}"><span class="nm">${esc(p.name)}</span><span class="amt"><span>${won(Number(p.contract))}</span><em>부가세 ${won(vat(p))}</em></span></a>`).join("")}</div>` : ""}
+      </details>`).join("")}
+      <div class="tx-r tx-t"><span class="mo">소계</span><span class="num">${won(h.c)}</span><span class="num v">${won(h.v)}</span><span class="num tot">${won(h.c + h.v)}</span><span class="num cnt">${h.n}</span></div>
+    </div></section>`).join("")}
+  <p class="tx-note">연간 합계: 공급가액 ${won(all.c)} · 부가세 ${won(all.v)} · 합계 ${won(all.c + all.v)}</p>`;
+}
 function monthlyHTML() {
   const years = [...new Set([...projects.map(yearOf), CUR])].sort((a, b) => b - a);
   const yr = F.year || CUR;
@@ -511,7 +599,7 @@ function monthlyHTML() {
 
 function renderMain() {
   const board = location.hash === "#/board";
-  const mv = isMonthly();
+  const mv = isMonthly(), tx = isTax();
   app.innerHTML = `
   <header class="nav">
     <div class="logo">${LOGO}<b>MediaBowl</b></div>
@@ -519,8 +607,8 @@ function renderMain() {
       <button class="ghost sm" data-act="logout" title="${esc(user.email || "")}">로그아웃</button></div>
   </header>
   ${store.mode === "local" ? `<div class="banner">체험 모드: 이 브라우저에만 저장돼요. Firebase 설정을 넣으면 폰과 PC가 동기화돼요.</div>` : ""}
-  <nav class="vtabs"><a href="#/" class="${mv ? "" : "on"}">메인</a><a href="#/monthly" class="${mv ? "on" : ""}">월별보기</a></nav>
-  ${mv ? `<div id="mv">${monthlyHTML()}</div>` : `
+  <nav class="vtabs"><a href="#/" class="${mv || tx ? "" : "on"}">메인</a><a href="#/monthly" class="${mv ? "on" : ""}">월별보기</a><a href="#/tax" class="${tx ? "on" : ""}">세금</a></nav>
+  ${mv ? `<div id="mv">${monthlyHTML()}</div>` : tx ? `<div id="mv">${taxHTML()}</div>` : `
   <div id="stats"></div>
   <div id="hl"></div>
   <form class="qa" id="qa" autocomplete="off">
@@ -660,13 +748,15 @@ function renderContent() {
     c.innerHTML = `<div class="tbl">
       <div class="lh"><span class="hd-5">시작일</span><span class="hd-1">프로젝트</span><span class="hd-2">카테고리</span><span class="hd-3">상태</span><span class="hd-6">납기</span><span class="hd-7">계약금액</span><span class="hd-8">정산</span></div>
       ${list.map(p => `<a class="row" href="#/p/${p.id}">
-        <span class="c c-n">${esc(p.name)}</span>
-        <span class="c c-s"><i class="dot d-${p.status}"></i>${p.status}</span>
+        <span class="c c-n"><i class="cd cd${catOf(p) ? CATS.indexOf(catOf(p)) : "n"}"></i>${esc(p.name)}</span>
         <span class="m">
           ${cell("c-cat", "", tag(catOf(p)))}
-          ${cell("c-start", "시작", dt(p.start))}
-          ${cell("c-due", "납기", dt(p.due))}
-          ${cell("c-amt", "", Number(p.contract) ? won(p.contract) : "")}
+          <span class="c c-s st-${p.status}"><i class="dot d-${p.status}"></i>${p.status}</span>
+          <span class="m2">
+            ${cell("c-start", "시작", dt(p.start))}
+            ${cell("c-due", "납기", dt(p.due))}
+            ${cell("c-amt", "", Number(p.contract) ? won(p.contract) : "")}
+          </span>
           ${cell("c-set", "", Number(p.contract) ? (unpaid(p) > 0 ? `<span class="stb un">미수</span>` : `<span class="stb ok">정산완료</span>`) : "")}
         </span></a>`).join("")}</div>`;
   }
@@ -680,10 +770,6 @@ function renderDetail(id) {
   <div class="bar"><button class="ghost" data-act="back" aria-label="목록으로">←</button>
     <input class="title" data-f="name" value="${esc(p.name)}" style="flex:1" aria-label="프로젝트 이름">
     <span id="saved" class="muted"></span></div>
-  <div class="metarow">
-    <select data-f="status" aria-label="상태">${STATUSES.map(s => `<option ${p.status === s ? "selected" : ""}>${s}</option>`).join("")}</select>
-    <select data-f="category" aria-label="카테고리"><option value="">카테고리 없음</option>${CATS.map(c => `<option ${catOf(p) === c ? "selected" : ""}>${c}</option>`).join("")}</select>
-  </div>
   <nav class="tabs">
     ${[["main", "버짓·정보"], ["notes", "노트"]].map(([k, l]) => `<button data-act="tab" data-t="${k}" class="${detailTab === k ? "on" : ""}">${l}</button>`).join("")}
   </nav>
@@ -709,6 +795,9 @@ function renderPane(p) {
       <datalist id="exl"><option value="외주비"><option value="장비 렌탈"><option value="출장비"><option value="식비"><option value="인건비"><option value="음악·폰트 라이선스"><option value="기타"></datalist>
       <button class="ghost" data-act="addExp">+ 지출 추가</button></section>
     <section class="ps"><h3 class="sh">정보·링크</h3>
+      <div class="grid2" style="margin-bottom:12px">
+        <label class="f">상태<select data-f="status">${STATUSES.map(s => `<option ${p.status === s ? "selected" : ""}>${s}</option>`).join("")}</select></label>
+        <label class="f">카테고리<select data-f="category"><option value="">없음</option>${CATS.map(c => `<option ${catOf(p) === c ? "selected" : ""}>${c}</option>`).join("")}</select></label></div>
       <div class="grid4">
         <label class="f">등록일<input type="date" data-f="registered" value="${esc(regOf(p))}"></label>
         <label class="f">시작일<input type="date" data-f="start" value="${esc(p.start)}"></label>
@@ -770,7 +859,7 @@ app.addEventListener("change", e => {
   else if (t.id === "fh1") { F.h1 = t.checked; renderContent(); }
   else if (t.id === "fh2") { F.h2 = t.checked; renderContent(); }
   else if (t.id === "fdone") { F.hideDone = t.checked; renderContent(); }
-  else if (t.id === "fyear") { F.year = +t.value; isMonthly() ? renderMain() : renderContent(); }
+  else if (t.id === "fyear") { F.year = +t.value; isMonthly() || isTax() ? renderMain() : renderContent(); }
 });
 
 app.addEventListener("submit", async e => {
