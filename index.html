@@ -92,8 +92,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:rgba(255,255,255,.92)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .dot{width:9px;height:9px;border-radius:50%;flex:none;display:inline-block}
-.d-Pre{background:var(--s-pre)}.d-Production{background:var(--s-prod)}.d-Post{background:var(--s-post)}.d-Done{background:var(--s-done)}
-.hero .d-Pre{background:#cfd4db}.hero .d-Production{background:#8fb0ff}.hero .d-Post{background:#ffd43b}.hero .d-Done{background:#5ee0a8}
+.d-진행중{background:var(--s-prod)}.d-완료{background:var(--s-done)}
+.hero .d-진행중{background:#ffd43b}.hero .d-완료{background:#5ee0a8}
 
 /* 하이라이트 */
 .hl{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(0,1fr);gap:24px;margin-bottom:38px}
@@ -150,6 +150,17 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .t1{background:#fbdcd7;color:#b0382a}
 .t2{background:#cdeee8;color:#0b7a6c}
 .pc-m{min-height:1.6em}
+
+/* 빠른 추가 */
+.qa{background:var(--panel);border-radius:14px;padding:14px 16px;margin:0 0 30px;display:grid;grid-template-columns:minmax(0,1fr) 7rem 7rem 9.5rem 7rem auto;gap:10px;align-items:end}
+.qa label{display:block;font-size:12.5px;color:var(--mu)}
+.qa label input,.qa label select{margin-top:5px}
+.qa .btn{height:42px}
+.qa-t{grid-column:1/-1;margin:0;font-size:15px;font-weight:700}
+@media (max-width:760px){
+  .qa{grid-template-columns:1fr 1fr;padding:14px}
+  .qa .nm,.qa .btn{grid-column:1/-1}
+}
 
 /* 월별보기 */
 .vtabs{display:flex;gap:6px;margin:0 0 20px;border-bottom:1px solid var(--line)}
@@ -309,9 +320,10 @@ const COMPANY = "미디어볼";
 /* ======================================== */
 
 const USE_FIREBASE = !!FIREBASE_CONFIG.apiKey;
-const STATUSES = ["Pre", "Production", "Post", "Done"];
-const LISTORD = { Production: 0, Post: 1, Pre: 2, Done: 3 };
-const SCOLOR = { Pre: "var(--s-pre)", Production: "var(--s-prod)", Post: "var(--s-post)", Done: "var(--s-done)" };
+const STATUSES = ["진행중", "완료"];
+const LISTORD = { 진행중: 0, 완료: 1 };
+const SCOLOR = { 진행중: "var(--s-prod)", 완료: "var(--s-done)" };
+const normSt = v => (v === "Done" || v === "완료") ? "완료" : "진행중";
 const CATS = ["제작", "촬영", "편집"];
 const NUM = ["contract", "received"];
 const CUR = new Date().getFullYear();
@@ -319,27 +331,27 @@ const LOGO = `<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M2 11h24a12 1
 
 /* 노션 'Bowl 2026 Project List' 초기 데이터: [이름, 분류, 상태, 시작, 마감, 납기] */
 const SEED = [
-  ["알몸마라톤 티저","","Done","2026-01-05","","2026-01-07"],
-  ["윈터700","","Production","","",""],
-  ["청년마을","","Production","2026-01-05","",""],
-  ["태학이형 시즌영상","","Production","2026-01-15","",""],
-  ["꼭대기 운동마을 유튜브 기획","","Production","","",""],
-  ["알몸 마라톤","","Done","2026-02-14","2026-02-14","2026-02-16"],
-  ["로펫","","Done","","",""],
-  ["미탄 아웃도어 빌리지_펨투어","","Done","","",""],
-  ["조각필름","","Production","","",""],
-  ["클래식한 형들의 옷장","","Pre","","",""],
-  ["SNK 2026","","Done","2026-05-26","2026-06-18","2026-06-15"],
-  ["제주 오디션","","Done","","",""],
-  ["서울창경","","Done","","",""],
-  ["강원랜드 도박방지","","Done","","",""],
-  ["휠로그 제안서","","Done","","",""],
-  ["온기잇다_기억되게 하기","","Done","2026-08-11","2026-09-12",""],
-  ["k - local","","Done","","",""],
-  ["지은이 컨설팅","","Production","","",""],
-  ["온기잇다_ep2.호스피스","","Pre","","",""],
-  ["소상공인 도약지원 메가쇼_일산","","Pre","","",""],
-  ["26모두의창업","","Pre","","",""]
+  ["알몸마라톤 티저","","완료","2026-01-05","","2026-01-07"],
+  ["윈터700","","진행중","","",""],
+  ["청년마을","","진행중","2026-01-05","",""],
+  ["태학이형 시즌영상","","진행중","2026-01-15","",""],
+  ["꼭대기 운동마을 유튜브 기획","","진행중","","",""],
+  ["알몸 마라톤","","완료","2026-02-14","2026-02-14","2026-02-16"],
+  ["로펫","","완료","","",""],
+  ["미탄 아웃도어 빌리지_펨투어","","완료","","",""],
+  ["조각필름","","진행중","","",""],
+  ["클래식한 형들의 옷장","","진행중","","",""],
+  ["SNK 2026","","완료","2026-05-26","2026-06-18","2026-06-15"],
+  ["제주 오디션","","완료","","",""],
+  ["서울창경","","완료","","",""],
+  ["강원랜드 도박방지","","완료","","",""],
+  ["휠로그 제안서","","완료","","",""],
+  ["온기잇다_기억되게 하기","","완료","2026-08-11","2026-09-12",""],
+  ["k - local","","완료","","",""],
+  ["지은이 컨설팅","","진행중","","",""],
+  ["온기잇다_ep2.호스피스","","진행중","","",""],
+  ["소상공인 도약지원 메가쇼_일산","","진행중","","",""],
+  ["26모두의창업","","진행중","","",""]
 ];
 
 /* ================= 유틸 ================= */
@@ -503,6 +515,15 @@ function renderMain() {
   ${mv ? `<div id="mv">${monthlyHTML()}</div>` : `
   <div id="stats"></div>
   <div id="hl"></div>
+  <form class="qa" id="qa" autocomplete="off">
+    <h3 class="qa-t">새 프로젝트 추가</h3>
+    <label class="nm">프로젝트명<input id="qa-n" required placeholder="프로젝트명"></label>
+    <label>카테고리<select id="qa-c"><option value="">없음</option>${CATS.map(c => `<option>${c}</option>`).join("")}</select></label>
+    <label>상태<select id="qa-s">${STATUSES.map(x => `<option>${x}</option>`).join("")}</select></label>
+    <label>시작일<input id="qa-d" type="date"></label>
+    <label title="353 입력 → 353,000원">버짓(천원)<input id="qa-b" type="number" inputmode="decimal" placeholder="예: 353"></label>
+    <button class="btn" type="submit">+ 추가</button>
+  </form>
   <section class="allp">
     <div class="sec-h"><h3>전체 프로젝트</h3>
       <nav class="tabs"><a href="#/" class="${board ? "" : "on"}">목록</a><a href="#/board" class="${board ? "on" : ""}">보드</a></nav></div>
@@ -522,7 +543,7 @@ function filtered() {
   const q = F.q.toLowerCase();
   return projects.filter(p =>
     inYear(p) &&
-    (!F.hideDone || p.status !== "Done") &&
+    (!F.hideDone || p.status !== "완료") &&
     (!F.cat || catOf(p) === F.cat) &&
     (!q || p.name.toLowerCase().includes(q)));
 }
@@ -545,8 +566,8 @@ function renderStats() {
   const h2 = yp.filter(p => monthOf(p) >= 7);
   const sumC = a => a.reduce((t, p) => t + (Number(p.contract) || 0), 0);
   const total = yp.length;
-  const active = n("Production") + n("Post");
-  const order = ["Production", "Post", "Pre", "Done"];
+  const active = n("진행중");
+  const order = ["진행중", "완료"];
 
   el.innerHTML = `
   <div class="titlerow">
@@ -579,9 +600,9 @@ function renderHighlights() {
   const el = $("#hl"); if (!el) return;
   if (location.hash === "#/board" || !projects.length) { el.innerHTML = ""; return; }
   const yp = projects.filter(inYear);
-  const act = yp.filter(p => p.status === "Production" || p.status === "Post").sort(byDate).slice(0, 6);
+  const act = yp.filter(p => p.status === "진행중").sort(byDate).slice(0, 6);
   const today = todayStr();
-  const up = yp.filter(p => p.due && p.due >= today && p.status !== "Done").sort((a, b) => a.due.localeCompare(b.due)).slice(0, 5);
+  const up = yp.filter(p => p.due && p.due >= today && p.status !== "완료").sort((a, b) => a.due.localeCompare(b.due)).slice(0, 5);
 
   const card = p => { const d = daysTo(p.due); return `<a class="pcard" href="#/p/${p.id}" style="--c:${SCOLOR[p.status]}">
     <span class="pc-top"><span class="pc-st"><i class="dot d-${p.status}"></i>${p.status}</span>${d !== null ? `<span class="dd ${ddClass(d)}">${dday(d)}</span>` : ""}</span>
@@ -614,7 +635,7 @@ function renderContent() {
   if (!list.length) { c.innerHTML = `<div class="empty">조건에 맞는 프로젝트가 없어요.</div>`; return; }
 
   if (board) {
-    const cols = STATUSES.filter(s => !F.hideDone || s !== "Done");
+    const cols = STATUSES.filter(s => !F.hideDone || s !== "완료");
     c.innerHTML = `<div class="board">${cols.map(s => {
       const items = list.filter(p => p.status === s).sort(byDate);
       return `<div class="col" data-status="${s}"><h3><i class="dot d-${s}"></i>${s} <span class="muted">${items.length}</span></h3>
@@ -737,6 +758,16 @@ app.addEventListener("change", e => {
   else if (t.id === "fyear") { F.year = +t.value; isMonthly() ? renderMain() : renderContent(); }
 });
 
+app.addEventListener("submit", async e => {
+  if (e.target.id !== "qa") return;
+  e.preventDefault();
+  const name = $("#qa-n").value.trim(); if (!name) return;
+  const np = mk([name, $("#qa-c").value, $("#qa-s").value, $("#qa-d").value, "", ""]);
+  const b = $("#qa-b").value; if (b !== "") np.contract = Math.round(Number(b) * 1000);
+  projects.push(np); renderContent();
+  e.target.reset(); $("#qa-n").focus();
+  try { await store.save(np); } catch (err) { alert("저장 실패: " + (err.code || err.message)); }
+});
 app.addEventListener("click", async e => {
   const b = e.target.closest("[data-act]"); if (!b) return;
   const act = b.dataset.act, p = cur(), i = +b.dataset.i;
@@ -753,9 +784,8 @@ app.addEventListener("click", async e => {
   else if (act === "logout") { flush(); if (confirm("로그아웃할까요?")) store.signOut(); }
   else if (act === "back") { flush(); location.hash = "#/"; }
   else if (act === "new") {
-    const name = prompt("프로젝트 이름"); if (!name || !name.trim()) return;
-    const np = mk([name.trim(), F.cat || "", "Pre", "", "", ""]);
-    projects.push(np); await store.save(np); detailTab = "main"; location.hash = "#/p/" + np.id;
+    if (location.hash !== "#/" && location.hash !== "") { location.hash = "#/"; await new Promise(r => setTimeout(r, 60)); }
+    const n = $("#qa-n"); if (n) { n.scrollIntoView({ block: "center" }); n.focus(); }
   }
   else if (act === "seed") { await store.seed(SEED.map(mk)); }
   else if (act === "tab") { detailTab = b.dataset.t; if (p) renderPane(p); }
@@ -797,7 +827,7 @@ addEventListener("hashchange", () => { flush(); render(); });
 
 /* ================= 시작 ================= */
 function onData(list) {
-  projects = list.map(x => pending.get(x.id) || x);
+  projects = list.map(x => pending.get(x.id) || x).map(x => x.status === normSt(x.status) ? x : { ...x, status: normSt(x.status) });
   projects.forEach(p => { p.expenses ||= []; p.links ||= []; });
   if (!ready) { ready = true; render(); return; }
   if (routeId()) return;
