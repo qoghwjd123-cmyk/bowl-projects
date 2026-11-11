@@ -4,8 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#f3f4f5" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0e1012" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#e3e6eb">
 <title>미디어볼 프로젝트</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,21 +25,19 @@ service cloud.firestore {
 }
 
 FIREBASE_CONFIG를 비워두면 '체험 모드'로 동작합니다 (이 브라우저에만 저장).
+색 바꾸기: 아래 :root 의 --brand(파랑), --sun(노랑) 값만 바꾸면 전체 색이 바뀝니다.
 =====================================================
 -->
 <style>
 :root{
-  --bg:#f3f4f5; --panel:#ffffff; --ink:#14171a; --mu:#6a7077; --line:#e2e4e7; --soft:#eceef0;
-  --btn:#14171a; --btnx:#ffffff; --danger:#c62828;
-  --s-pre:#8b9299; --s-prod:#3b7ddd; --s-post:#d6a01a; --s-done:#39a275;
+  color-scheme:light;
+  --bg:#e3e6eb; --panel:#f2f4f7; --ink:#1b1f24; --mu:#58616b; --line:#c9cfd6; --soft:#d6dae0;
+  --brand:#3552d1; --sun:#ffd43b; --coral:#ff6b57; --teal:#12a594; --violet:#7950f2;
+  --danger:#b3261e;
+  --s-pre:#7b838c; --s-prod:#2f6fd0; --s-post:#d99a00; --s-done:#2a8a63;
   --sans:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;
   --num:"Archivo","Pretendard Variable",Pretendard,sans-serif;
 }
-@media(prefers-color-scheme:dark){:root{
-  --bg:#0e1012; --panel:#16191c; --ink:#eceff1; --mu:#8b9299; --line:#24282c; --soft:#1d2125;
-  --btn:#eceff1; --btnx:#0e1012; --danger:#ef6b6b;
-  --s-prod:#5b9bf0; --s-post:#e5b53a; --s-done:#4fbf8f;
-}}
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans);-webkit-text-size-adjust:100%}
@@ -48,86 +45,118 @@ body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans);-webkit-te
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 input,select,textarea{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 12px;width:100%;outline:none}
-input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
 .muted{color:var(--mu);font-size:13px}
-.num{font-family:var(--num);font-stretch:112%;font-variant-numeric:tabular-nums}
 
-/* 상단 */
-.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:30px 0 22px}
-.brand{display:flex;align-items:baseline;gap:12px;min-width:0;flex-wrap:nowrap}
-.brand h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.02em;white-space:nowrap}
-.brand .en{font-family:var(--num);font-stretch:125%;font-weight:600;font-size:12px;color:var(--mu);letter-spacing:.04em}
+/* 상단 내비 */
+.nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0}
+.logo{display:flex;align-items:center;gap:10px;min-width:0}
+.logo svg{width:28px;height:28px;flex:none}
+.logo b{font-family:var(--num);font-stretch:125%;font-size:15px;font-weight:700;letter-spacing:.02em;white-space:nowrap}
 .acts{display:flex;gap:8px;flex:none}
-.btn{border:0;background:var(--btn);color:var(--btnx);border-radius:10px;padding:9px 15px;font-weight:600;white-space:nowrap}
+.btn{border:0;background:var(--sun);color:#1b1f24;border-radius:10px;padding:9px 15px;font-weight:700;white-space:nowrap}
 .ghost{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:8px 13px;white-space:nowrap}
 .sm{font-size:13px;padding:8px 11px;color:var(--mu)}
 .danger{color:var(--danger)}
 .banner{background:var(--soft);color:var(--mu);border-radius:10px;padding:8px 12px;font-size:13px;margin:0 0 14px}
 
-/* 탭 */
-.tabs{display:flex;gap:6px;margin:0 0 18px;overflow-x:auto}
-.tabs a,.tabs button{padding:7px 15px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--mu);text-decoration:none;white-space:nowrap;font-size:14px;font-weight:500}
-.tabs .on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+/* 클래퍼보드 줄무늬 */
+.clap{height:22px;background:repeating-linear-gradient(-45deg,#14181c 0 16px,#f2f4f7 16px 32px)}
+.clap.sm{height:10px;border-radius:5px;margin-bottom:14px}
 
-/* 장부 요약 */
-.ledger{display:grid;grid-template-columns:1.7fr 1fr 1fr 1fr;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.k{padding:22px 22px 22px 24px;border-left:1px solid var(--line);min-width:0}
-.k:first-child{border-left:0;padding-left:0}
-.k-l{font-size:13px;color:var(--mu);margin-bottom:10px}
-.k-big{font-family:var(--num);font-stretch:112%;font-variant-numeric:tabular-nums;font-weight:700;font-size:clamp(40px,7vw,72px);line-height:1;letter-spacing:-.03em;white-space:nowrap}
-.k-v{font-family:var(--num);font-stretch:108%;font-variant-numeric:tabular-nums;font-weight:700;font-size:clamp(20px,2.4vw,26px);line-height:1.1;letter-spacing:-.02em;white-space:nowrap}
-.k-big em,.k-v em{font-style:normal;font-family:var(--sans);font-stretch:100%;font-weight:600;color:var(--mu);margin-left:.18em}
-.k-big em{font-size:.3em}
-.k-v em{font-size:.55em}
-.k-s{font-size:13px;color:var(--mu);margin-top:10px}
-.sbar{display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--soft);margin:18px 0 10px}
+/* 회사명(히어로 밖) */
+.titlerow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:6px 0 16px}
+.page-name{margin:0;font-size:clamp(34px,6vw,52px);font-weight:800;letter-spacing:-.03em;line-height:1.1}
+.titlerow select{width:auto}
+
+/* 히어로 */
+.hero{background:var(--brand);color:#fff;border-radius:20px;overflow:hidden;margin-bottom:34px}
+.hero-body{padding:24px 28px 26px}
+.hero-kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.hk{background:rgba(255,255,255,.12);border-radius:14px;padding:16px 18px;min-width:0}
+.hk.main{grid-column:1/-1;background:rgba(255,255,255,.18);padding:20px 22px}
+.hk .l{display:block;font-size:13px;color:rgba(255,255,255,.86);margin-bottom:10px}
+.hk .big{display:block;font-family:var(--num);font-stretch:112%;font-variant-numeric:tabular-nums;font-weight:700;font-size:clamp(38px,7vw,68px);line-height:1;letter-spacing:-.03em;white-space:nowrap}
+.hk .v{display:block;font-family:var(--num);font-stretch:108%;font-variant-numeric:tabular-nums;font-weight:700;font-size:clamp(22px,3vw,30px);line-height:1.1;letter-spacing:-.02em;white-space:nowrap}
+.hk em{font-style:normal;font-family:var(--sans);font-stretch:100%;font-weight:600;color:rgba(255,255,255,.82);margin-left:.18em}
+.hk .big em{font-size:.3em}
+.hk .v em{font-size:.55em}
+.hk .s{display:block;font-size:13px;color:rgba(255,255,255,.86);margin-top:10px}
+.sbar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:rgba(255,255,255,.22);margin:22px 0 10px}
 .sbar i{display:block;height:100%}
-.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--mu);margin-bottom:26px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:rgba(255,255,255,.92)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .dot{width:9px;height:9px;border-radius:50%;flex:none;display:inline-block}
 .d-Pre{background:var(--s-pre)}.d-Production{background:var(--s-prod)}.d-Post{background:var(--s-post)}.d-Done{background:var(--s-done)}
+.hero .d-Pre{background:#cfd4db}.hero .d-Production{background:#8fb0ff}.hero .d-Post{background:#ffd43b}.hero .d-Done{background:#5ee0a8}
 
-/* 필터 */
+/* 하이라이트 */
+.hl{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(0,1fr);gap:24px;margin-bottom:38px}
+.sec h3,.sec-h h3{margin:0 0 12px;font-size:19px;font-weight:700;letter-spacing:-.01em}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.pcard{display:flex;flex-direction:column;gap:6px;background:var(--panel);border-radius:14px;border-top:4px solid var(--c);padding:14px 16px;text-decoration:none;color:inherit;min-width:0}
+.pcard:hover{background:#fafbfc}
+.pc-top{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12.5px;color:var(--mu)}
+.pc-st{display:inline-flex;align-items:center;gap:6px}
+.pc-n{font-weight:700;font-size:16px;line-height:1.35;overflow-wrap:anywhere}
+.pc-f{display:flex;justify-content:space-between;gap:8px;margin-top:6px;font-family:var(--num);font-variant-numeric:tabular-nums;font-size:13px;color:var(--mu)}
+.dd{font-family:var(--num);font-weight:700;font-size:12px;padding:2px 8px;border-radius:999px;background:var(--soft);color:var(--ink);white-space:nowrap}
+.dd.soon{background:var(--sun)}
+.dd.late{background:var(--coral);color:#fff}
+.side{display:flex;flex-direction:column;gap:20px;min-width:0}
+.box{background:var(--panel);border-radius:14px;padding:16px 18px}
+.up{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);text-decoration:none;color:inherit;font-size:14px}
+.up.first{border-top:0}
+.up span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.up .r{display:flex;align-items:center;gap:8px;flex:none;font-family:var(--num);font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--mu)}
+
+/* 전체 프로젝트 */
+.sec-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.sec-h h3{margin:0}
+.tabs{display:flex;gap:6px;margin:0 0 18px;overflow-x:auto}
+.sec-h .tabs{margin:0}
+.tabs a,.tabs button{padding:7px 15px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--mu);text-decoration:none;white-space:nowrap;font-size:14px;font-weight:500}
+.tabs .on{background:var(--brand);border-color:var(--brand);color:#fff}
 .filters{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
 .filters input[type=search]{flex:1;min-width:150px}
 .filters select{width:auto}
 .filters label{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--mu);white-space:nowrap}
 .filters input[type=checkbox]{width:auto}
-
-/* 목록 */
-.tbl{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-.lh,.row{display:grid;grid-template-columns:minmax(0,1fr) 5.5rem 7rem 5.4rem 5.4rem 5.4rem 7.4rem;column-gap:12px;align-items:center;padding:0 20px}
+.tbl{background:var(--panel);border-radius:14px;overflow:hidden}
+.lh,.row{display:grid;grid-template-columns:minmax(0,1fr) 7rem 5.4rem 5.4rem 5.4rem 7.8rem;column-gap:12px;align-items:center;padding:0 20px}
 .lh{height:40px;background:var(--soft);font-size:12.5px;color:var(--mu)}
 .row{min-height:56px;padding-top:12px;padding-bottom:12px;border-top:1px solid var(--line);text-decoration:none;color:inherit}
 .lh+.row{border-top:0}
-.row:hover{background:var(--soft)}
+.row:hover{background:#fafbfc}
 .m{display:contents}
 .c-n{order:0;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.c-cat{order:1;color:var(--mu);font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.c-s{order:2;display:inline-flex;align-items:center;gap:8px;font-size:13.5px}
-.c-reg{order:3}.c-start{order:4}.c-due{order:5}
+.c-s{order:1;display:inline-flex;align-items:center;gap:8px;font-size:13.5px}
+.c-reg{order:2}.c-start{order:3}.c-due{order:4}
 .c-reg,.c-start,.c-due{font-family:var(--num);font-variant-numeric:tabular-nums;font-size:13px;color:var(--mu)}
-.c-amt{order:6;text-align:right;font-family:var(--num);font-variant-numeric:tabular-nums;font-size:14px}
+.c-amt{order:5;text-align:right;font-family:var(--num);font-variant-numeric:tabular-nums;font-size:14px}
 .lh span:last-child{text-align:right}
 .c::before{display:none}
-.hd-1{order:0}.hd-2{order:1}.hd-3{order:2}.hd-4{order:3}.hd-5{order:4}.hd-6{order:5}.hd-7{order:6}
+.hd-1{order:0}.hd-2{order:1}.hd-3{order:2}.hd-4{order:3}.hd-5{order:4}.hd-6{order:5}
 
 /* 보드 */
 .board{display:flex;gap:12px;overflow-x:auto;padding-bottom:12px}
 .col{flex:1 0 250px;min-width:250px;background:var(--soft);border-radius:14px;padding:12px}
 .col h3{margin:2px 4px 12px;font-size:14px;display:flex;align-items:center;gap:8px;font-weight:600}
-.col.over{outline:2px dashed var(--ink)}
-.kcard{display:block;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-bottom:8px;text-decoration:none;color:inherit}
+.col.over{outline:2px dashed var(--brand)}
+.kcard{display:block;background:var(--panel);border-radius:10px;padding:11px 13px;margin-bottom:8px;text-decoration:none;color:inherit}
 .kcard b{display:block;margin-bottom:3px;font-weight:600}
 .kcard small{color:var(--mu);font-size:12.5px}
-.empty{text-align:center;padding:44px 12px;color:var(--mu);border:1px dashed var(--line);border-radius:14px}
+.empty{text-align:center;padding:36px 12px;color:var(--mu);border:1px dashed var(--line);border-radius:14px}
+
+/* 푸터 */
+.foot{margin-top:48px;text-align:center;color:var(--mu);font-size:13px}
 
 /* 상세 */
 .bar{display:flex;align-items:center;gap:10px;padding:18px 0;position:sticky;top:0;background:var(--bg);z-index:5}
 .title{font-size:21px;font-weight:700;border:0;background:transparent;padding:6px 4px;letter-spacing:-.01em}
 .metarow{display:flex;gap:8px;margin-bottom:14px}
-.metarow>*{flex:1}
-.pane{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.metarow select{flex:0 0 auto;width:auto;min-width:170px}
+.pane{background:var(--panel);border-radius:14px;padding:16px}
 textarea.notes{min-height:52vh;resize:vertical;line-height:1.75;border:0;padding:2px;background:transparent}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
@@ -145,23 +174,28 @@ h4{margin:18px 0 8px;font-size:14px;font-weight:600}
 .login h1{margin:0;font-size:28px;font-weight:800;letter-spacing:-.02em}
 
 /* 모바일 */
+@media(max-width:860px){
+  .hl{grid-template-columns:1fr}
+}
 @media(max-width:760px){
   #app{padding:0 16px calc(40px + env(safe-area-inset-bottom))}
-  .top{padding:22px 0 16px}
-  .brand h1{font-size:22px}
-  .brand .en{display:none}
-  .ledger{grid-template-columns:1fr}
-  .k:first-child{padding:18px 0}
-  .k:not(:first-child){display:grid;grid-template-columns:1fr auto;column-gap:12px;align-items:baseline;border-left:0;border-top:1px solid var(--line);padding:12px 0}
-  .k:not(:first-child) .k-l{margin:0}
-  .k:not(:first-child) .k-v{text-align:right;font-size:20px}
-  .k:not(:first-child) .k-s{grid-column:1/-1;margin-top:2px}
+  .nav{padding:12px 0}
+  .hero{border-radius:16px;margin-bottom:28px}
+  .hero-body{padding:18px 16px 20px}
+  .hero-kpi{grid-template-columns:1fr;gap:8px}
+  .hk{padding:12px 14px}
+  .hk.main{padding:16px 16px}
+  .hk:not(.main){display:grid;grid-template-columns:1fr auto;column-gap:10px;align-items:baseline}
+  .hk:not(.main) .l{margin:0}
+  .hk:not(.main) .v{text-align:right;font-size:20px}
+  .hk:not(.main) .s{grid-column:1/-1;margin-top:2px}
+  .sec-h{flex-direction:column;align-items:flex-start}
   .lh{display:none}
   .row{grid-template-columns:minmax(0,1fr) auto;row-gap:6px;padding:14px 16px}
   .m{display:flex;flex-wrap:wrap;gap:2px 14px;grid-column:1/-1;order:3;font-size:12.5px;color:var(--mu)}
   .c-n{order:0}.c-s{order:1}
   .c::before{display:inline;content:attr(data-l) " ";color:var(--mu);opacity:.8}
-  .c-cat::before,.c-amt::before{content:""}
+  .c-amt::before{content:""}
   .c.e{display:none}
   .c-amt{text-align:left;font-size:12.5px}
   .grid4{grid-template-columns:1fr 1fr}
@@ -194,27 +228,29 @@ const COMPANY = "미디어볼";
 const USE_FIREBASE = !!FIREBASE_CONFIG.apiKey;
 const STATUSES = ["Pre", "Production", "Post", "Done"];
 const LISTORD = { Production: 0, Post: 1, Pre: 2, Done: 3 };
+const SCOLOR = { Pre: "var(--s-pre)", Production: "var(--s-prod)", Post: "var(--s-post)", Done: "var(--s-done)" };
 const NUM = ["contract", "received"];
 const CUR = new Date().getFullYear();
+const LOGO = `<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M2 11h24a12 12 0 0 1-24 0z" fill="var(--sun)"/><rect x="2" y="8" width="24" height="3" rx="1.5" fill="var(--brand)"/></svg>`;
 
 /* 노션 'Bowl 2026 Project List' 초기 데이터: [이름, 분류, 상태, 시작, 마감, 납기] */
 const SEED = [
-  ["알몸마라톤 티저","꼭대기","Done","2026-01-05","","2026-01-07"],
-  ["윈터700","윈터700","Production","","",""],
-  ["청년마을","꼭대기","Production","2026-01-05","",""],
-  ["태학이형 시즌영상","보울","Production","2026-01-15","",""],
-  ["꼭대기 운동마을 유튜브 기획","꼭대기","Production","","",""],
-  ["알몸 마라톤","꼭대기","Done","2026-02-14","2026-02-14","2026-02-16"],
+  ["알몸마라톤 티저","","Done","2026-01-05","","2026-01-07"],
+  ["윈터700","","Production","","",""],
+  ["청년마을","","Production","2026-01-05","",""],
+  ["태학이형 시즌영상","","Production","2026-01-15","",""],
+  ["꼭대기 운동마을 유튜브 기획","","Production","","",""],
+  ["알몸 마라톤","","Done","2026-02-14","2026-02-14","2026-02-16"],
   ["로펫","","Done","","",""],
-  ["미탄 아웃도어 빌리지_펨투어","꼭대기","Done","","",""],
+  ["미탄 아웃도어 빌리지_펨투어","","Done","","",""],
   ["조각필름","","Production","","",""],
   ["클래식한 형들의 옷장","","Pre","","",""],
-  ["SNK 2026","보울","Done","2026-05-26","2026-06-18","2026-06-15"],
+  ["SNK 2026","","Done","2026-05-26","2026-06-18","2026-06-15"],
   ["제주 오디션","","Done","","",""],
   ["서울창경","","Done","","",""],
   ["강원랜드 도박방지","","Done","","",""],
   ["휠로그 제안서","","Done","","",""],
-  ["온기잇다_기억되게 하기","보울","Done","2026-08-11","2026-09-12",""],
+  ["온기잇다_기억되게 하기","","Done","2026-08-11","2026-09-12",""],
   ["k - local","","Done","","",""],
   ["지은이 컨설팅","","Production","","",""],
   ["온기잇다_ep2.호스피스","","Pre","","",""],
@@ -234,6 +270,9 @@ const todayStr = () => ymd(new Date());
 const dt = d => d ? d.slice(2).replace(/-/g, ".") : "";            // 2026-01-05 → 26.01.05
 const regOf = p => p.registered || (p.createdAt ? ymd(new Date(p.createdAt)) : "");
 const yearOf = p => +((p.start || p.due || regOf(p) || String(CUR)).slice(0, 4));
+const daysTo = d => d ? Math.round((new Date(d + "T00:00:00") - new Date(todayStr() + "T00:00:00")) / 86400000) : null;
+const dday = n => n === null ? "" : n === 0 ? "D-day" : n > 0 ? `D-${n}` : `D+${-n}`;
+const ddClass = n => n === null ? "" : n < 0 ? "late" : n <= 7 ? "soon" : "";
 const sumExp = p => (p.expenses || []).reduce((a, e) => a + (Number(e.a) || 0), 0);
 const margin = p => (Number(p.contract) || 0) - sumExp(p);
 const unpaid = p => Math.max(0, (Number(p.contract) || 0) - (Number(p.received) || 0));
@@ -290,7 +329,7 @@ async function firebaseStore() {
 /* ================= 상태 ================= */
 const app = $("#app");
 let store, user = null, projects = [], ready = false;
-const F = { q: "", cat: "", showDone: false, year: CUR };
+const F = { q: "", showDone: false, year: CUR };
 let detailTab = "notes";
 const pending = new Map();
 let saveTimer = null;
@@ -316,7 +355,7 @@ const cur = () => { const id = routeId(); return id ? projects.find(p => p.id ==
 
 /* ================= 로그인 ================= */
 function renderLogin() {
-  app.innerHTML = `<div class="login"><h1>${COMPANY}</h1><p class="muted">프로젝트 현황을 보려면 로그인하세요</p>
+  app.innerHTML = `<div class="login"><div class="logo">${LOGO}<b style="font-size:22px">${COMPANY}</b></div><p class="muted">프로젝트 현황을 보려면 로그인하세요</p>
   <button class="btn" data-act="login">Google로 로그인</button></div>`;
 }
 
@@ -330,24 +369,25 @@ function render() {
 
 function renderMain() {
   const board = location.hash === "#/board";
-  const cats = [...new Set(projects.map(p => p.category).filter(Boolean))];
-  const years = [...new Set([...projects.map(yearOf), CUR])].sort((a, b) => b - a);
   app.innerHTML = `
-  <header class="top">
-    <div class="brand"><h1>${COMPANY}</h1><span class="en">MediaBowl</span></div>
+  <header class="nav">
+    <div class="logo">${LOGO}<b>MediaBowl</b></div>
     <div class="acts"><button class="btn" data-act="new">+ 새 프로젝트</button>
       <button class="ghost sm" data-act="logout" title="${esc(user.email || "")}">로그아웃</button></div>
   </header>
   ${store.mode === "local" ? `<div class="banner">체험 모드: 이 브라우저에만 저장돼요. Firebase 설정을 넣으면 폰과 PC가 동기화돼요.</div>` : ""}
-  <nav class="tabs"><a href="#/" class="${board ? "" : "on"}">목록</a><a href="#/board" class="${board ? "on" : ""}">보드</a></nav>
   <div id="stats"></div>
-  <div class="filters">
-    <select id="fyear"><option value="0" ${F.year === 0 ? "selected" : ""}>전체 연도</option>${years.map(y => `<option value="${y}" ${F.year === y ? "selected" : ""}>${y}년</option>`).join("")}</select>
-    <input type="search" id="q" placeholder="프로젝트 검색" value="${esc(F.q)}">
-    <select id="fcat"><option value="">전체 분류</option>${cats.map(c => `<option ${F.cat === c ? "selected" : ""}>${esc(c)}</option>`).join("")}</select>
-    <label><input type="checkbox" id="fdone" ${F.showDone ? "checked" : ""}> 완료 포함</label>
-  </div>
-  <div id="content"></div>`;
+  <div id="hl"></div>
+  <section class="allp">
+    <div class="sec-h"><h3>전체 프로젝트</h3>
+      <nav class="tabs"><a href="#/" class="${board ? "" : "on"}">목록</a><a href="#/board" class="${board ? "on" : ""}">보드</a></nav></div>
+    <div class="filters">
+      <input type="search" id="q" placeholder="프로젝트 검색" value="${esc(F.q)}">
+      <label><input type="checkbox" id="fdone" ${F.showDone ? "checked" : ""}> 완료 포함</label>
+    </div>
+    <div id="content"></div>
+  </section>
+  <footer class="foot"><div class="clap sm" aria-hidden="true"></div>${COMPANY} MediaBowl</footer>`;
   renderContent();
 }
 
@@ -357,19 +397,19 @@ function filtered() {
   return projects.filter(p =>
     inYear(p) &&
     (F.showDone || p.status !== "Done") &&
-    (!F.cat || p.category === F.cat) &&
-    (!q || (p.name + " " + (p.category || "")).toLowerCase().includes(q)));
+    (!q || p.name.toLowerCase().includes(q)));
 }
 const byDate = (a, b) => (a.start || a.due || regOf(a) || "9999").localeCompare(b.start || b.due || regOf(b) || "9999");
 
 function renderStats() {
+  const el = $("#stats"); if (!el) return;
+  const years = [...new Set([...projects.map(yearOf), CUR])].sort((a, b) => b - a);
   const yp = projects.filter(inYear);
   const n = s => yp.filter(p => p.status === s).length;
   const revenue = yp.reduce((a, p) => a + (Number(p.contract) || 0), 0);
   const received = yp.reduce((a, p) => a + (Number(p.received) || 0), 0);
   const unp = yp.reduce((a, p) => a + unpaid(p), 0);
-  const withC = yp.filter(p => Number(p.contract) > 0);
-  const mar = withC.reduce((a, p) => a + margin(p), 0);
+  const mar = yp.filter(p => Number(p.contract) > 0).reduce((a, p) => a + margin(p), 0);
   const marPct = revenue ? Math.round(mar / revenue * 100) : null;
   const rcvPct = revenue ? Math.round(received / revenue * 100) : null;
   const label = F.year ? `${F.year} 누적 매출` : "전체 누적 매출";
@@ -377,28 +417,55 @@ function renderStats() {
   const active = n("Production") + n("Post");
   const order = ["Production", "Post", "Pre", "Done"];
 
-  $("#stats").innerHTML = `
-  <section class="ledger">
-    <div class="k"><div class="k-l">${label}</div>
-      <div class="k-big">${money(revenue)}</div>
-      <div class="k-s">${revenue ? `입금 ${won(received)}` : "프로젝트의 계약금액을 입력하면 집계돼요"}</div></div>
-    <div class="k"><div class="k-l">프로젝트</div>
-      <div class="k-v">${total}<em>건</em></div>
-      <div class="k-s">진행 중 ${active}건</div></div>
-    <div class="k"><div class="k-l">미수금</div>
-      <div class="k-v">${money(unp)}</div>
-      <div class="k-s">${rcvPct === null ? "-" : `입금률 ${rcvPct}%`}</div></div>
-    <div class="k"><div class="k-l">마진</div>
-      <div class="k-v">${money(mar)}</div>
-      <div class="k-s">${marPct === null ? "-" : `마진율 ${marPct}%`}</div></div>
-  </section>
-  <div class="sbar" role="img" aria-label="상태별 프로젝트 비율">${total ? order.map(s => n(s) ? `<i class="d-${s}" style="width:${n(s) / total * 100}%"></i>` : "").join("") : ""}</div>
-  <div class="legend">${order.map(s => `<span><i class="dot d-${s}"></i>${s} ${n(s)}</span>`).join("")}</div>`;
+  el.innerHTML = `
+  <div class="titlerow">
+    <h2 class="page-name">${COMPANY}</h2>
+    <select id="fyear" aria-label="연도"><option value="0" ${F.year === 0 ? "selected" : ""}>전체 연도</option>${years.map(y => `<option value="${y}" ${F.year === y ? "selected" : ""}>${y}년</option>`).join("")}</select>
+  </div>
+  <section class="hero">
+    <div class="clap" aria-hidden="true"></div>
+    <div class="hero-body">
+      <div class="hero-kpi">
+        <div class="hk main"><span class="l">${label}</span>
+          <b class="big">${money(revenue)}</b>
+          <span class="s">${revenue ? `입금 ${won(received)}` : "프로젝트의 계약금액을 입력하면 집계돼요"}</span></div>
+        <div class="hk"><span class="l">프로젝트</span><b class="v">${total}<em>건</em></b><span class="s">진행 중 ${active}건</span></div>
+        <div class="hk"><span class="l">미수금</span><b class="v">${money(unp)}</b><span class="s">${rcvPct === null ? "-" : `입금률 ${rcvPct}%`}</span></div>
+        <div class="hk"><span class="l">마진</span><b class="v">${money(mar)}</b><span class="s">${marPct === null ? "-" : `마진율 ${marPct}%`}</span></div>
+      </div>
+      <div class="sbar" role="img" aria-label="상태별 프로젝트 비율">${total ? order.map(s => n(s) ? `<i class="d-${s}" style="width:${n(s) / total * 100}%"></i>` : "").join("") : ""}</div>
+      <div class="legend">${order.map(s => `<span><i class="dot d-${s}"></i>${s} ${n(s)}</span>`).join("")}</div>
+    </div>
+  </section>`;
+}
+
+function renderHighlights() {
+  const el = $("#hl"); if (!el) return;
+  if (location.hash === "#/board" || !projects.length) { el.innerHTML = ""; return; }
+  const yp = projects.filter(inYear);
+  const act = yp.filter(p => p.status === "Production" || p.status === "Post").sort(byDate).slice(0, 6);
+  const today = todayStr();
+  const up = yp.filter(p => p.due && p.due >= today && p.status !== "Done").sort((a, b) => a.due.localeCompare(b.due)).slice(0, 5);
+
+  const card = p => { const d = daysTo(p.due); return `<a class="pcard" href="#/p/${p.id}" style="--c:${SCOLOR[p.status]}">
+    <span class="pc-top"><span class="pc-st"><i class="dot d-${p.status}"></i>${p.status}</span>${d !== null ? `<span class="dd ${ddClass(d)}">${dday(d)}</span>` : ""}</span>
+    <b class="pc-n">${esc(p.name)}</b>
+    <span class="pc-f"><span>${p.start ? "시작 " + dt(p.start) : ""}</span><span>${Number(p.contract) ? won(p.contract) : ""}</span></span></a>`; };
+
+  el.innerHTML = `<div class="hl">
+    <section class="sec"><h3>진행 중인 프로젝트</h3>
+      ${act.length ? `<div class="pgrid">${act.map(card).join("")}</div>` : `<div class="empty">진행 중인 프로젝트가 없어요.</div>`}</section>
+    <aside class="side">
+      <section class="box sec"><h3>다가오는 납기</h3>
+        ${up.length ? up.map((p, i) => { const d = daysTo(p.due); return `<a class="up${i ? "" : " first"}" href="#/p/${p.id}"><span>${esc(p.name)}</span><span class="r">${dt(p.due)}<span class="dd ${ddClass(d)}">${dday(d)}</span></span></a>`; }).join("")
+          : `<p class="muted" style="margin:0">납기일을 입력하면 여기에 모여요.</p>`}</section>
+    </aside></div>`;
 }
 
 function renderContent() {
   const c = $("#content"); if (!c) return;
   renderStats();
+  renderHighlights();
   const board = location.hash === "#/board";
 
   if (!projects.length) {
@@ -415,18 +482,17 @@ function renderContent() {
       const items = list.filter(p => p.status === s).sort(byDate);
       return `<div class="col" data-status="${s}"><h3><i class="dot d-${s}"></i>${s} <span class="muted">${items.length}</span></h3>
       ${items.map(p => `<a class="kcard" href="#/p/${p.id}" draggable="true" data-id="${p.id}"><b>${esc(p.name)}</b>
-        <small>${esc(p.category || "")}${p.due ? (p.category ? "  " : "") + "납기 " + dt(p.due) : ""}</small></a>`).join("")}</div>`;
+        <small>${p.due ? "납기 " + dt(p.due) : ""}</small></a>`).join("")}</div>`;
     }).join("")}</div>`;
   } else {
     list.sort((a, b) => (LISTORD[a.status] - LISTORD[b.status]) || byDate(a, b));
     const cell = (cls, label, val) => `<span class="c ${cls}${val ? "" : " e"}" data-l="${label}">${val || ""}</span>`;
     c.innerHTML = `<div class="tbl">
-      <div class="lh"><span class="hd-1">프로젝트</span><span class="hd-2">분류</span><span class="hd-3">상태</span><span class="hd-4">등록일</span><span class="hd-5">시작일</span><span class="hd-6">납기</span><span class="hd-7">계약금액</span></div>
+      <div class="lh"><span class="hd-1">프로젝트</span><span class="hd-2">상태</span><span class="hd-3">등록일</span><span class="hd-4">시작일</span><span class="hd-5">납기</span><span class="hd-6">계약금액</span></div>
       ${list.map(p => `<a class="row" href="#/p/${p.id}">
         <span class="c c-n">${esc(p.name)}</span>
         <span class="c c-s"><i class="dot d-${p.status}"></i>${p.status}</span>
         <span class="m">
-          ${cell("c-cat", "", esc(p.category))}
           ${cell("c-reg", "등록", dt(regOf(p)))}
           ${cell("c-start", "시작", dt(p.start))}
           ${cell("c-due", "납기", dt(p.due))}
@@ -439,15 +505,12 @@ function renderContent() {
 function renderDetail(id) {
   const p = projects.find(x => x.id === id);
   if (!p) { app.innerHTML = `<div class="empty" style="margin-top:40px">프로젝트를 찾을 수 없어요.<br><br><button class="ghost" data-act="back">← 목록으로</button></div>`; return; }
-  const cats = [...new Set(projects.map(x => x.category).filter(Boolean))];
   app.innerHTML = `
   <div class="bar"><button class="ghost" data-act="back" aria-label="목록으로">←</button>
     <input class="title" data-f="name" value="${esc(p.name)}" style="flex:1" aria-label="프로젝트 이름">
     <span id="saved" class="muted"></span></div>
   <div class="metarow">
     <select data-f="status" aria-label="상태">${STATUSES.map(s => `<option ${p.status === s ? "selected" : ""}>${s}</option>`).join("")}</select>
-    <input data-f="category" list="catl" placeholder="분류 / 발주처" value="${esc(p.category)}" aria-label="분류">
-    <datalist id="catl">${cats.map(c => `<option value="${esc(c)}">`).join("")}</datalist>
   </div>
   <nav class="tabs">
     ${[["notes", "노트"], ["budget", "버짓"], ["info", "정보·링크"]].map(([k, l]) => `<button data-act="tab" data-t="${k}" class="${detailTab === k ? "on" : ""}">${l}</button>`).join("")}
@@ -529,8 +592,7 @@ app.addEventListener("input", e => {
 });
 app.addEventListener("change", e => {
   const t = e.target;
-  if (t.id === "fcat") { F.cat = t.value; renderContent(); }
-  else if (t.id === "fdone") { F.showDone = t.checked; renderContent(); }
+  if (t.id === "fdone") { F.showDone = t.checked; renderContent(); }
   else if (t.id === "fyear") { F.year = +t.value; renderContent(); }
 });
 
@@ -551,7 +613,7 @@ app.addEventListener("click", async e => {
   else if (act === "back") { flush(); location.hash = "#/"; }
   else if (act === "new") {
     const name = prompt("프로젝트 이름"); if (!name || !name.trim()) return;
-    const np = mk([name.trim(), F.cat, "Pre", "", "", ""]);
+    const np = mk([name.trim(), "", "Pre", "", "", ""]);
     projects.push(np); await store.save(np); detailTab = "notes"; location.hash = "#/p/" + np.id;
   }
   else if (act === "seed") { await store.seed(SEED.map(mk)); }
