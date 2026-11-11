@@ -230,7 +230,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .mv-sum b{font-family:var(--num);font-size:clamp(20px,2.4vw,26px);white-space:nowrap}
 .mv-sum .warn b{color:var(--coral)}
 .mtbl{background:var(--panel);border-radius:14px;overflow:hidden}
-.mh,.mr{display:grid;grid-template-columns:4rem minmax(80px,1fr) 8.5rem 8.5rem 8.5rem 3.5rem;column-gap:14px;align-items:center;padding:0 20px}
+.mh,.mr{display:grid;grid-template-columns:4rem minmax(80px,1fr) 8.5rem 8.5rem 3.5rem;column-gap:14px;align-items:center;padding:0 20px}
 .mh{height:40px;background:var(--soft);font-size:12.5px;color:var(--mu)}
 .mh span:nth-child(n+3),.mr .num{text-align:right}
 .mr{min-height:52px;border-top:1px solid var(--line);cursor:pointer;list-style:none}
@@ -243,9 +243,9 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .mr .num.zero{color:var(--mu);opacity:.6}
 .mbar{height:10px;border-radius:5px;background:var(--soft);overflow:hidden;display:flex}
 .mbar i{display:block;height:100%}
-.mbar .r{background:var(--teal)}.mbar .u{background:var(--coral)}
+.mbar .r{background:var(--brand)}.mbar .u{background:var(--coral)}
 .mdet{background:#fafbfc;border-top:1px solid var(--line);padding:6px 20px 10px}
-.mdet a{display:grid;grid-template-columns:minmax(0,1fr) 8.5rem 8.5rem 8.5rem 3.5rem;column-gap:14px;padding:9px 0;text-decoration:none;color:inherit;font-size:14px;border-top:1px dashed var(--line)}
+.mdet a{display:grid;grid-template-columns:minmax(0,1fr) 8.5rem 8.5rem 3.5rem;column-gap:14px;padding:9px 0;text-decoration:none;color:inherit;font-size:14px;border-top:1px dashed var(--line)}
 .mdet a:first-child{border-top:0}
 .mdet a span:nth-child(n+2){text-align:right;font-family:var(--num);font-variant-numeric:tabular-nums}
 .mdet .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
@@ -256,7 +256,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
 .unl{margin-top:30px}
 .unl h3{margin:0 0 12px;font-size:17px}
-.unl .mtbl a{display:grid;grid-template-columns:minmax(0,1fr) 8.5rem 8.5rem 8.5rem;column-gap:14px;padding:13px 20px;text-decoration:none;color:inherit;border-top:1px solid var(--line);font-size:14px}
+.unl .mtbl a{display:grid;grid-template-columns:minmax(0,1fr) 8.5rem 8.5rem;column-gap:14px;padding:13px 20px;text-decoration:none;color:inherit;border-top:1px solid var(--line);font-size:14px}
 .unl .mtbl a:first-child{border-top:0}
 .unl .mtbl a span:nth-child(n+2){text-align:right;font-family:var(--num);font-variant-numeric:tabular-nums}
 @media (max-width:760px){
@@ -268,16 +268,16 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
   .mr>*{grid-row:1}
   .mr .mo{grid-column:1}
   .mr>.num:nth-child(3){grid-column:2}
-  .mr>.num:nth-child(5){grid-column:3}
+  .mr>.num:nth-child(4){grid-column:3}
   .mr .mbc{grid-column:1/-1;grid-row:2}
-  .mr .rc,.mr .cnt{display:none}
+  .mr .cnt{display:none}
   .mt span:nth-child(2){display:none}
   .mt.mr{padding:14px 16px}
   .mdet{padding:4px 16px 8px}
   .mdet a{grid-template-columns:minmax(0,1fr) auto 6.4rem;column-gap:8px}
-  .mdet a span:nth-child(3),.mdet a span:nth-child(5){display:none}
+  .mdet a span:nth-child(4){display:none}
   .unl .mtbl a{grid-template-columns:minmax(0,1fr) auto;padding:12px 16px}
-  .unl .mtbl a span:nth-child(2),.unl .mtbl a span:nth-child(3){display:none}
+  .unl .mtbl a span:nth-child(2){display:none}
 }
 
 /* 보드 */
@@ -584,21 +584,20 @@ function monthlyHTML() {
   return `
   <div class="mv-h"><h2>${yr}년 월별 매출</h2>
     <select id="fyear" aria-label="연도">${years.map(y => `<option value="${y}" ${yr === y ? "selected" : ""}>${y}년</option>`).join("")}</select></div>
-  <div class="mv-sum"><div><small>연 매출 (계약금액)</small><b>${won(tot.c)}</b></div>
-    <div><small>입금</small><b>${won(tot.r)}</b></div>
+  <div class="mv-sum" style="grid-template-columns:repeat(2,1fr)"><div><small>연 매출 (계약금액)</small><b>${won(tot.c)}</b></div>
     <div class="${tot.u ? "warn" : ""}"><small>미수금</small><b>${won(tot.u)}</b></div></div>
-  <div class="leg"><span><i style="background:var(--teal)"></i>입금</span><span><i style="background:var(--coral)"></i>미수</span><span>기준월: 시작일 → 납기 → 등록일</span></div>
+  <div class="leg"><span><i style="background:var(--brand)"></i>계약금액</span><span><i style="background:var(--coral)"></i>미수</span><span>기준월: 시작일 → 납기 → 등록일</span></div>
   <div class="mtbl">
-    <div class="mh"><span>월</span><span>매출 비중</span><span>계약금액</span><span>입금</span><span>미수</span><span>건수</span></div>
+    <div class="mh"><span>월</span><span>매출 비중</span><span>계약금액</span><span>미수</span><span>건수</span></div>
     ${rows.map(r => `<details><summary class="mr"><span class="mo">${r.m}월</span>
-      <span class="mbc" style="grid-column:2"><span class="mbar" style="width:${Math.round(r.c / mx * 100)}%;min-width:${r.c ? 4 : 0}px">${r.c ? `<i class="r" style="width:${Math.round(Math.min(r.r, r.c) / r.c * 100)}%"></i><i class="u" style="flex:1"></i>` : ""}</span></span>
-      <span class="num ${r.c ? "" : "zero"}">${z(r.c)}</span><span class="num rc ${r.r ? "" : "zero"}">${z(r.r)}</span><span class="num ${r.u ? "un" : "zero"}">${z(r.u)}</span><span class="num cnt ${r.ps.length ? "" : "zero"}">${r.ps.length || "–"}</span></summary>
-      ${r.ps.length ? `<div class="mdet">${r.ps.map(p => `<a href="#/p/${p.id}"><span class="nm">${esc(p.name)}</span><span>${z(num(p.contract))}</span><span>${z(num(p.received))}</span><span style="${unpaid(p) ? "color:var(--coral)" : ""}">${z(unpaid(p))}</span><span></span></a>`).join("")}</div>` : ""}
+      <span class="mbc" style="grid-column:2"><span class="mbar" style="width:${Math.round(r.c / mx * 100)}%;min-width:${r.c ? 4 : 0}px">${r.c ? `<i class="r" style="width:${100 - Math.round(Math.min(r.u, r.c) / r.c * 100)}%"></i><i class="u" style="flex:1"></i>` : ""}</span></span>
+      <span class="num ${r.c ? "" : "zero"}">${z(r.c)}</span><span class="num ${r.u ? "un" : "zero"}">${z(r.u)}</span><span class="num cnt ${r.ps.length ? "" : "zero"}">${r.ps.length || "–"}</span></summary>
+      ${r.ps.length ? `<div class="mdet">${r.ps.map(p => `<a href="#/p/${p.id}"><span class="nm">${esc(p.name)}</span><span>${z(num(p.contract))}</span><span style="${unpaid(p) ? "color:var(--coral)" : ""}">${z(unpaid(p))}</span><span></span></a>`).join("")}</div>` : ""}
     </details>`).join("")}
-    <div class="mr mt"><span class="mo">합계</span><span></span><span class="num">${won(tot.c)}</span><span class="num rc">${won(tot.r)}</span><span class="num ${tot.u ? "un" : ""}">${won(tot.u)}</span><span class="num cnt">${tot.n}</span></div>
+    <div class="mr mt"><span class="mo">합계</span><span></span><span class="num">${won(tot.c)}</span><span class="num ${tot.u ? "un" : ""}">${won(tot.u)}</span><span class="num cnt">${tot.n}</span></div>
   </div>
   <section class="unl"><h3>미수금 있는 프로젝트 ${unList.length}건</h3>
-    ${unList.length ? `<div class="mtbl">${unList.map(p => `<a href="#/p/${p.id}"><span class="nm" style="font-weight:600">${esc(p.name)}</span><span>${won(num(p.contract))}</span><span>${won(num(p.received))}</span><span style="color:var(--coral);font-weight:600">${won(unpaid(p))}</span></a>`).join("")}</div>` : `<div class="empty" style="padding:24px">미수금이 없어요.</div>`}
+    ${unList.length ? `<div class="mtbl">${unList.map(p => `<a href="#/p/${p.id}"><span class="nm" style="font-weight:600">${esc(p.name)}</span><span>${won(num(p.contract))}</span><span style="color:var(--coral);font-weight:600">${won(unpaid(p))}</span></a>`).join("")}</div>` : `<div class="empty" style="padding:24px">미수금이 없어요.</div>`}
   </section>`;
 }
 
