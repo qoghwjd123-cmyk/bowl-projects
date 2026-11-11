@@ -89,6 +89,9 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .hf .l{margin-bottom:8px}
 .sbar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:rgba(255,255,255,.22);margin:22px 0 10px}
 .sbar i{display:block;height:100%}
+.sbar.cat{margin:18px 0 10px}
+.hero .cc0{background:#ffffff}.hero .cc1{background:#ff8a78}.hero .cc2{background:#b69cff}.hero .ccn{background:#8f9bc4}
+.legend.cat{margin-top:0}
 .legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:rgba(255,255,255,.92)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .dot{width:9px;height:9px;border-radius:50%;flex:none;display:inline-block}
@@ -668,6 +671,7 @@ function renderStats() {
   const total = yp.length;
   const active = n("진행중");
   const order = ["진행중", "완료"];
+  const cats = [...CATS.map((name, k) => ({ name, k, n: yp.filter(p => catOf(p) === name).length })), { name: "미분류", k: "n", n: yp.filter(p => !catOf(p)).length }];
 
   el.innerHTML = `
   <div class="titlerow">
@@ -692,6 +696,8 @@ function renderStats() {
       </div>
       <div class="sbar" role="img" aria-label="상태별 프로젝트 비율">${total ? order.map(s => n(s) ? `<i class="d-${s}" style="width:${n(s) / total * 100}%"></i>` : "").join("") : ""}</div>
       <div class="legend">${order.map(s => `<span><i class="dot d-${s}"></i>${s} ${n(s)}</span>`).join("")}</div>
+      ${total ? `<div class="sbar cat" role="img" aria-label="카테고리별 프로젝트 비율">${cats.map(c => c.n ? `<i class="cc${c.k}" style="width:${c.n / total * 100}%"></i>` : "").join("")}</div>
+      <div class="legend cat">${cats.map(c => c.n ? `<span><i class="dot cc${c.k}"></i>${c.name} ${c.n}건 (${Math.round(c.n / total * 100)}%)</span>` : "").join("")}</div>` : ""}
     </div>
   </section>`;
 }
