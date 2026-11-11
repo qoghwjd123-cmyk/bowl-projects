@@ -128,21 +128,21 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .filters label{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--mu);white-space:nowrap}
 .filters input[type=checkbox]{width:auto}
 .tbl{background:var(--panel);border-radius:14px;overflow:hidden}
-.lh,.row{display:grid;grid-template-columns:5.4rem minmax(0,1fr) 4.8rem 7rem 5.4rem 5.4rem 7.8rem;column-gap:12px;align-items:center;padding:0 20px}
+.lh,.row{display:grid;grid-template-columns:minmax(0,1fr) 4.8rem 7rem 5.4rem 5.4rem 7.8rem;column-gap:12px;align-items:center;padding:0 20px}
 .lh{height:40px;background:var(--soft);font-size:12.5px;color:var(--mu)}
 .row{min-height:56px;padding-top:12px;padding-bottom:12px;border-top:1px solid var(--line);text-decoration:none;color:inherit}
 .lh+.row{border-top:0}
 .row:hover{background:#fafbfc}
 .m{display:contents}
-.c-n{order:1;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.c-cat{order:2}
-.c-s{order:3;display:inline-flex;align-items:center;gap:8px;font-size:13.5px}
-.c-reg{order:0}.c-start{order:4}.c-due{order:5}
-.c-reg,.c-start,.c-due{font-family:var(--num);font-variant-numeric:tabular-nums;font-size:13px;color:var(--mu)}
-.c-amt{order:6;text-align:right;font-family:var(--num);font-variant-numeric:tabular-nums;font-size:14px}
+.c-n{order:0;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.c-cat{order:1}
+.c-s{order:2;display:inline-flex;align-items:center;gap:8px;font-size:13.5px}
+.c-start{order:3}.c-due{order:4}
+.c-start,.c-due{font-family:var(--num);font-variant-numeric:tabular-nums;font-size:13px;color:var(--mu)}
+.c-amt{order:5;text-align:right;font-family:var(--num);font-variant-numeric:tabular-nums;font-size:14px}
 .lh span:last-child{text-align:right}
 .c::before{display:none}
-.hd-4{order:0}.hd-1{order:1}.hd-2{order:2}.hd-3{order:3}.hd-5{order:4}.hd-6{order:5}.hd-7{order:6}
+.hd-1{order:0}.hd-2{order:1}.hd-3{order:2}.hd-5{order:3}.hd-6{order:4}.hd-7{order:5}
 
 /* 카테고리 태그 */
 .tag{display:inline-block;font-size:12.5px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap;line-height:1.5}
@@ -277,7 +277,6 @@ h4{margin:18px 0 8px;font-size:14px;font-weight:600}
   .row{grid-template-columns:minmax(0,1fr) auto;row-gap:6px;padding:14px 16px}
   .m{display:flex;flex-wrap:wrap;gap:2px 14px;grid-column:1/-1;order:3;font-size:12.5px;color:var(--mu)}
   .c-n{order:0}.c-s{order:1}
-  .c-reg{order:3}
   .c::before{display:inline;content:attr(data-l) " ";color:var(--mu);opacity:.8}
   .c-cat::before,.c-amt::before{content:""}
   .c.e{display:none}
@@ -416,7 +415,7 @@ async function firebaseStore() {
 /* ================= 상태 ================= */
 const app = $("#app");
 let store, user = null, projects = [], ready = false;
-const F = { q: "", cat: "", showDone: false, year: CUR };
+const F = { q: "", cat: "", hideDone: false, year: CUR };
 let detailTab = "main";
 const pending = new Map();
 let saveTimer = null;
@@ -510,7 +509,7 @@ function renderMain() {
     <div class="filters">
       <input type="search" id="q" placeholder="프로젝트 검색" value="${esc(F.q)}">
       <select id="fcat" aria-label="카테고리"><option value="">전체 카테고리</option>${CATS.map(c => `<option ${F.cat === c ? "selected" : ""}>${c}</option>`).join("")}</select>
-      <label><input type="checkbox" id="fdone" ${F.showDone ? "checked" : ""}> 완료 포함</label>
+      <label><input type="checkbox" id="fdone" ${F.hideDone ? "checked" : ""}> 완료 숨기기</label>
     </div>
     <div id="content"></div>
   </section>`}
@@ -523,7 +522,7 @@ function filtered() {
   const q = F.q.toLowerCase();
   return projects.filter(p =>
     inYear(p) &&
-    (F.showDone || p.status !== "Done") &&
+    (!F.hideDone || p.status !== "Done") &&
     (!F.cat || catOf(p) === F.cat) &&
     (!q || p.name.toLowerCase().includes(q)));
 }
@@ -615,7 +614,7 @@ function renderContent() {
   if (!list.length) { c.innerHTML = `<div class="empty">조건에 맞는 프로젝트가 없어요.</div>`; return; }
 
   if (board) {
-    const cols = STATUSES.filter(s => F.showDone || s !== "Done");
+    const cols = STATUSES.filter(s => !F.hideDone || s !== "Done");
     c.innerHTML = `<div class="board">${cols.map(s => {
       const items = list.filter(p => p.status === s).sort(byDate);
       return `<div class="col" data-status="${s}"><h3><i class="dot d-${s}"></i>${s} <span class="muted">${items.length}</span></h3>
@@ -626,13 +625,12 @@ function renderContent() {
     list.sort((a, b) => (LISTORD[a.status] - LISTORD[b.status]) || byDate(a, b));
     const cell = (cls, label, val) => `<span class="c ${cls}${val ? "" : " e"}" data-l="${label}">${val || ""}</span>`;
     c.innerHTML = `<div class="tbl">
-      <div class="lh"><span class="hd-4">등록일</span><span class="hd-1">프로젝트</span><span class="hd-2">카테고리</span><span class="hd-3">상태</span><span class="hd-5">시작일</span><span class="hd-6">납기</span><span class="hd-7">계약금액</span></div>
+      <div class="lh"><span class="hd-1">프로젝트</span><span class="hd-2">카테고리</span><span class="hd-3">상태</span><span class="hd-5">시작일</span><span class="hd-6">납기</span><span class="hd-7">계약금액</span></div>
       ${list.map(p => `<a class="row" href="#/p/${p.id}">
         <span class="c c-n">${esc(p.name)}</span>
         <span class="c c-s"><i class="dot d-${p.status}"></i>${p.status}</span>
         <span class="m">
           ${cell("c-cat", "", tag(catOf(p)))}
-          ${cell("c-reg", "등록", dt(regOf(p)))}
           ${cell("c-start", "시작", dt(p.start))}
           ${cell("c-due", "납기", dt(p.due))}
           ${cell("c-amt", "", Number(p.contract) ? won(p.contract) : "")}
@@ -735,7 +733,7 @@ app.addEventListener("input", e => {
 app.addEventListener("change", e => {
   const t = e.target;
   if (t.id === "fcat") { F.cat = t.value; renderContent(); }
-  else if (t.id === "fdone") { F.showDone = t.checked; renderContent(); }
+  else if (t.id === "fdone") { F.hideDone = t.checked; renderContent(); }
   else if (t.id === "fyear") { F.year = +t.value; isMonthly() ? renderMain() : renderContent(); }
 });
 
