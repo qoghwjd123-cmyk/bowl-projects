@@ -617,7 +617,7 @@ function renderMain() {
     <label>카테고리<select id="qa-c"><option value="">없음</option>${CATS.map(c => `<option>${c}</option>`).join("")}</select></label>
     <label>상태<select id="qa-s">${STATUSES.map(x => `<option>${x}</option>`).join("")}</select></label>
     <label>시작일<input id="qa-d" type="date"></label>
-    <label title="353 입력 → 353,000원">버짓(천원)<input id="qa-b" type="number" inputmode="decimal" placeholder="예: 353"></label>
+    <label title="275.3 입력 → 275만 3천원">버짓(만원)<input id="qa-b" type="number" step="any" inputmode="decimal" placeholder="예: 275.3"></label>
     <button class="btn" type="submit">+ 추가</button>
   </form>
   <section class="allp">
@@ -777,7 +777,7 @@ function renderDetail(id) {
   renderPane(p);
 }
 
-const k = v => (v === "" || v == null) ? "" : String(Math.round(Number(v)) / 1000);
+const k = v => (v === "" || v == null) ? "" : String(Math.round(Number(v)) / 10000);
 function renderPane(p) {
   const el = $("#pane"); if (!el) return;
   document.querySelectorAll('[data-act="tab"]').forEach(b => b.classList.toggle("on", b.dataset.t === detailTab));
@@ -788,8 +788,8 @@ function renderPane(p) {
     el.innerHTML = `
     <section class="ps"><h3 class="sh">버짓</h3>
       <div class="grid2">
-        <label class="f">계약금액(천원)<input type="number" inputmode="decimal" placeholder="예: 353 → 353,000원" data-f="contract" value="${k(p.contract)}"></label>
-        <label class="f">입금액(천원)<input type="number" inputmode="decimal" placeholder="예: 353 → 353,000원" data-f="received" value="${k(p.received)}"></label></div>
+        <label class="f">계약금액(만원)<input type="number" step="any" inputmode="decimal" placeholder="예: 275.3 → 275만 3천원" data-f="contract" value="${k(p.contract)}"></label>
+        <label class="f">입금액(만원)<input type="number" step="any" inputmode="decimal" placeholder="예: 275.3 → 275만 3천원" data-f="received" value="${k(p.received)}"></label></div>
       <div class="sum"><div><small>지출 합계</small><b id="b-exp"></b></div><div><small>마진</small><b id="b-margin"></b></div><div><small>미수금</small><b id="b-unpaid"></b></div></div>
       <h4>지출 항목</h4><div id="exp"></div>
       <datalist id="exl"><option value="외주비"><option value="장비 렌탈"><option value="출장비"><option value="식비"><option value="인건비"><option value="음악·폰트 라이선스"><option value="기타"></datalist>
@@ -816,7 +816,7 @@ function renderExp(p) {
   p.expenses ||= [];
   $("#exp").innerHTML = p.expenses.map((e, i) => `<div class="erow">
     <input list="exl" placeholder="항목" data-ek="n" data-i="${i}" value="${esc(e.n)}">
-    <input type="number" inputmode="numeric" placeholder="금액(천원)" data-ek="a" data-i="${i}" value="${k(e.a)}">
+    <input type="number" step="any" inputmode="decimal" placeholder="금액(만원)" data-ek="a" data-i="${i}" value="${k(e.a)}">
     <button class="x" data-act="delExp" data-i="${i}" aria-label="지출 삭제">✕</button></div>`).join("") || `<div class="muted" style="margin-bottom:8px">지출 항목이 없어요.</div>`;
 }
 function renderLinks(p) {
@@ -842,12 +842,12 @@ app.addEventListener("input", e => {
   const p = cur(); if (!p) return;
   if (t.dataset.f) {
     const f = t.dataset.f;
-    p[f] = NUM.includes(f) ? (t.value === "" ? "" : Math.round(Number(t.value) * 1000)) : t.value;
+    p[f] = NUM.includes(f) ? (t.value === "" ? "" : Math.round(Number(t.value) * 10000)) : t.value;
     if (NUM.includes(f)) updateBudget(p);
     persist(p);
   } else if (t.dataset.ek) {
     const i = +t.dataset.i;
-    p.expenses[i][t.dataset.ek] = t.dataset.ek === "a" ? Math.round((Number(t.value) || 0) * 1000) : t.value;
+    p.expenses[i][t.dataset.ek] = t.dataset.ek === "a" ? Math.round((Number(t.value) || 0) * 10000) : t.value;
     updateBudget(p); persist(p);
   } else if (t.dataset.lk) {
     p.links[+t.dataset.i][t.dataset.lk] = t.value; persist(p);
@@ -867,7 +867,7 @@ app.addEventListener("submit", async e => {
   e.preventDefault();
   const name = $("#qa-n").value.trim(); if (!name) return;
   const np = mk([name, $("#qa-c").value, $("#qa-s").value, $("#qa-d").value, "", ""]);
-  const b = $("#qa-b").value; if (b !== "") np.contract = Math.round(Number(b) * 1000);
+  const b = $("#qa-b").value; if (b !== "") np.contract = Math.round(Number(b) * 10000);
   projects.push(np); renderContent();
   e.target.reset(); if (document.activeElement) document.activeElement.blur(); window.scrollTo({ top: 0 });
   try { await store.save(np); } catch (err) { alert("저장 실패: " + (err.code || err.message)); }
