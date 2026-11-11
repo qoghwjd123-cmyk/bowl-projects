@@ -74,7 +74,10 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .hero-body{padding:24px 28px 26px}
 .hero-kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .hk{background:rgba(255,255,255,.12);border-radius:14px;padding:16px 18px;min-width:0}
-.hk.main{grid-column:1/-1;background:rgba(255,255,255,.18);padding:20px 22px}
+.hk.main{grid-column:1/-1;background:rgba(255,255,255,.18);padding:20px 22px;display:flex;gap:28px;align-items:stretch;justify-content:space-between}
+.mtot{flex:1;min-width:0}
+.halves{display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:none;width:min(50%,460px)}
+.hf{background:rgba(255,255,255,.12);border-radius:12px;padding:14px 16px;min-width:0;display:flex;flex-direction:column;justify-content:space-between}
 .hk .l{display:block;font-size:13px;color:rgba(255,255,255,.86);margin-bottom:10px}
 .hk .big{display:block;font-family:var(--num);font-stretch:112%;font-variant-numeric:tabular-nums;font-weight:700;font-size:clamp(38px,7vw,68px);line-height:1;letter-spacing:-.03em;white-space:nowrap}
 .hk .v{display:block;font-family:var(--num);font-stretch:108%;font-variant-numeric:tabular-nums;font-weight:700;font-size:clamp(22px,3vw,30px);line-height:1.1;letter-spacing:-.02em;white-space:nowrap}
@@ -82,6 +85,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .hk .big em{font-size:.3em}
 .hk .v em{font-size:.55em}
 .hk .s{display:block;font-size:13px;color:rgba(255,255,255,.86);margin-top:10px}
+.hf .v{font-size:clamp(20px,2.1vw,24px)}
+.hf .l{margin-bottom:8px}
 .sbar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:rgba(255,255,255,.22);margin:22px 0 10px}
 .sbar i{display:block;height:100%}
 .legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:rgba(255,255,255,.92)}
@@ -123,20 +128,28 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .filters label{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--mu);white-space:nowrap}
 .filters input[type=checkbox]{width:auto}
 .tbl{background:var(--panel);border-radius:14px;overflow:hidden}
-.lh,.row{display:grid;grid-template-columns:minmax(0,1fr) 7rem 5.4rem 5.4rem 5.4rem 7.8rem;column-gap:12px;align-items:center;padding:0 20px}
+.lh,.row{display:grid;grid-template-columns:5.4rem minmax(0,1fr) 4.8rem 7rem 5.4rem 5.4rem 7.8rem;column-gap:12px;align-items:center;padding:0 20px}
 .lh{height:40px;background:var(--soft);font-size:12.5px;color:var(--mu)}
 .row{min-height:56px;padding-top:12px;padding-bottom:12px;border-top:1px solid var(--line);text-decoration:none;color:inherit}
 .lh+.row{border-top:0}
 .row:hover{background:#fafbfc}
 .m{display:contents}
-.c-n{order:0;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.c-s{order:1;display:inline-flex;align-items:center;gap:8px;font-size:13.5px}
-.c-reg{order:2}.c-start{order:3}.c-due{order:4}
+.c-n{order:1;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.c-cat{order:2}
+.c-s{order:3;display:inline-flex;align-items:center;gap:8px;font-size:13.5px}
+.c-reg{order:0}.c-start{order:4}.c-due{order:5}
 .c-reg,.c-start,.c-due{font-family:var(--num);font-variant-numeric:tabular-nums;font-size:13px;color:var(--mu)}
-.c-amt{order:5;text-align:right;font-family:var(--num);font-variant-numeric:tabular-nums;font-size:14px}
+.c-amt{order:6;text-align:right;font-family:var(--num);font-variant-numeric:tabular-nums;font-size:14px}
 .lh span:last-child{text-align:right}
 .c::before{display:none}
-.hd-1{order:0}.hd-2{order:1}.hd-3{order:2}.hd-4{order:3}.hd-5{order:4}.hd-6{order:5}
+.hd-4{order:0}.hd-1{order:1}.hd-2{order:2}.hd-3{order:3}.hd-5{order:4}.hd-6{order:5}.hd-7{order:6}
+
+/* 카테고리 태그 */
+.tag{display:inline-block;font-size:12.5px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap;line-height:1.5}
+.t0{background:#dde2f7;color:#2a43ad}
+.t1{background:#fbdcd7;color:#b0382a}
+.t2{background:#cdeee8;color:#0b7a6c}
+.pc-m{min-height:1.6em}
 
 /* 보드 */
 .board{display:flex;gap:12px;overflow-x:auto;padding-bottom:12px}
@@ -167,6 +180,8 @@ label.f input,label.f textarea{margin-top:5px;color:var(--ink);font-size:15px}
 .sum small{display:block;color:var(--mu);font-size:12.5px}
 .sum b{font-family:var(--num);font-variant-numeric:tabular-nums;font-size:16px}
 h4{margin:18px 0 8px;font-size:14px;font-weight:600}
+.ps+.ps{margin-top:28px;padding-top:24px;border-top:1px solid var(--line)}
+.sh{margin:0 0 14px;font-size:17px;font-weight:700;letter-spacing:-.01em}
 .erow{display:grid;grid-template-columns:1fr 140px 38px;gap:6px;margin-bottom:6px}
 .lrow{display:grid;grid-template-columns:130px 1fr 38px 38px;gap:6px;margin-bottom:6px}
 .x{border:1px solid var(--line);background:var(--panel);border-radius:10px}
@@ -184,7 +199,12 @@ h4{margin:18px 0 8px;font-size:14px;font-weight:600}
   .hero-body{padding:18px 16px 20px}
   .hero-kpi{grid-template-columns:1fr;gap:8px}
   .hk{padding:12px 14px}
-  .hk.main{padding:16px 16px}
+  .hk.main{padding:16px 16px;flex-direction:column;gap:14px}
+  .halves{width:100%;grid-template-columns:1fr;gap:8px}
+  .hf{display:grid;grid-template-columns:1fr auto;column-gap:10px;align-items:baseline;padding:12px 14px}
+  .hf .l{margin:0}
+  .hf .v{text-align:right;font-size:20px}
+  .hf .s{grid-column:1/-1;margin-top:2px}
   .hk:not(.main){display:grid;grid-template-columns:1fr auto;column-gap:10px;align-items:baseline}
   .hk:not(.main) .l{margin:0}
   .hk:not(.main) .v{text-align:right;font-size:20px}
@@ -194,8 +214,9 @@ h4{margin:18px 0 8px;font-size:14px;font-weight:600}
   .row{grid-template-columns:minmax(0,1fr) auto;row-gap:6px;padding:14px 16px}
   .m{display:flex;flex-wrap:wrap;gap:2px 14px;grid-column:1/-1;order:3;font-size:12.5px;color:var(--mu)}
   .c-n{order:0}.c-s{order:1}
+  .c-reg{order:3}
   .c::before{display:inline;content:attr(data-l) " ";color:var(--mu);opacity:.8}
-  .c-amt::before{content:""}
+  .c-cat::before,.c-amt::before{content:""}
   .c.e{display:none}
   .c-amt{text-align:left;font-size:12.5px}
   .grid4{grid-template-columns:1fr 1fr}
@@ -229,6 +250,7 @@ const USE_FIREBASE = !!FIREBASE_CONFIG.apiKey;
 const STATUSES = ["Pre", "Production", "Post", "Done"];
 const LISTORD = { Production: 0, Post: 1, Pre: 2, Done: 3 };
 const SCOLOR = { Pre: "var(--s-pre)", Production: "var(--s-prod)", Post: "var(--s-post)", Done: "var(--s-done)" };
+const CATS = ["제작", "촬영", "편집"];
 const NUM = ["contract", "received"];
 const CUR = new Date().getFullYear();
 const LOGO = `<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M2 11h24a12 12 0 0 1-24 0z" fill="var(--sun)"/><rect x="2" y="8" width="24" height="3" rx="1.5" fill="var(--brand)"/></svg>`;
@@ -273,6 +295,8 @@ const yearOf = p => +((p.start || p.due || regOf(p) || String(CUR)).slice(0, 4))
 const daysTo = d => d ? Math.round((new Date(d + "T00:00:00") - new Date(todayStr() + "T00:00:00")) / 86400000) : null;
 const dday = n => n === null ? "" : n === 0 ? "D-day" : n > 0 ? `D-${n}` : `D+${-n}`;
 const ddClass = n => n === null ? "" : n < 0 ? "late" : n <= 7 ? "soon" : "";
+const catOf = p => CATS.includes(p.category) ? p.category : "";
+const tag = c => c ? `<span class="tag t${CATS.indexOf(c)}">${c}</span>` : "";
 const sumExp = p => (p.expenses || []).reduce((a, e) => a + (Number(e.a) || 0), 0);
 const margin = p => (Number(p.contract) || 0) - sumExp(p);
 const unpaid = p => Math.max(0, (Number(p.contract) || 0) - (Number(p.received) || 0));
@@ -329,8 +353,8 @@ async function firebaseStore() {
 /* ================= 상태 ================= */
 const app = $("#app");
 let store, user = null, projects = [], ready = false;
-const F = { q: "", showDone: false, year: CUR };
-let detailTab = "notes";
+const F = { q: "", cat: "", showDone: false, year: CUR };
+let detailTab = "main";
 const pending = new Map();
 let saveTimer = null;
 
@@ -383,6 +407,7 @@ function renderMain() {
       <nav class="tabs"><a href="#/" class="${board ? "" : "on"}">목록</a><a href="#/board" class="${board ? "on" : ""}">보드</a></nav></div>
     <div class="filters">
       <input type="search" id="q" placeholder="프로젝트 검색" value="${esc(F.q)}">
+      <select id="fcat" aria-label="카테고리"><option value="">전체 카테고리</option>${CATS.map(c => `<option ${F.cat === c ? "selected" : ""}>${c}</option>`).join("")}</select>
       <label><input type="checkbox" id="fdone" ${F.showDone ? "checked" : ""}> 완료 포함</label>
     </div>
     <div id="content"></div>
@@ -397,6 +422,7 @@ function filtered() {
   return projects.filter(p =>
     inYear(p) &&
     (F.showDone || p.status !== "Done") &&
+    (!F.cat || catOf(p) === F.cat) &&
     (!q || p.name.toLowerCase().includes(q)));
 }
 const byDate = (a, b) => (a.start || a.due || regOf(a) || "9999").localeCompare(b.start || b.due || regOf(b) || "9999");
@@ -413,6 +439,10 @@ function renderStats() {
   const marPct = revenue ? Math.round(mar / revenue * 100) : null;
   const rcvPct = revenue ? Math.round(received / revenue * 100) : null;
   const label = F.year ? `${F.year} 누적 매출` : "전체 누적 매출";
+  const monthOf = p => +((p.start || p.due || regOf(p) || "").slice(5, 7)) || 0;
+  const h1 = yp.filter(p => monthOf(p) >= 1 && monthOf(p) <= 6);
+  const h2 = yp.filter(p => monthOf(p) >= 7);
+  const sumC = a => a.reduce((t, p) => t + (Number(p.contract) || 0), 0);
   const total = yp.length;
   const active = n("Production") + n("Post");
   const order = ["Production", "Post", "Pre", "Done"];
@@ -426,9 +456,14 @@ function renderStats() {
     <div class="clap" aria-hidden="true"></div>
     <div class="hero-body">
       <div class="hero-kpi">
-        <div class="hk main"><span class="l">${label}</span>
-          <b class="big">${money(revenue)}</b>
-          <span class="s">${revenue ? `입금 ${won(received)}` : "프로젝트의 계약금액을 입력하면 집계돼요"}</span></div>
+        <div class="hk main">
+          <div class="mtot"><span class="l">${label}</span>
+            <b class="big">${money(revenue)}</b>
+            <span class="s">${revenue ? `입금 ${won(received)}` : "프로젝트의 계약금액을 입력하면 집계돼요"}</span></div>
+          ${F.year ? `<div class="halves">
+            <div class="hf"><span class="l">상반기 1~6월</span><b class="v">${money(sumC(h1))}</b><span class="s">${h1.length}건</span></div>
+            <div class="hf"><span class="l">하반기 7~12월</span><b class="v">${money(sumC(h2))}</b><span class="s">${h2.length}건</span></div></div>` : ""}
+        </div>
         <div class="hk"><span class="l">프로젝트</span><b class="v">${total}<em>건</em></b><span class="s">진행 중 ${active}건</span></div>
         <div class="hk"><span class="l">미수금</span><b class="v">${money(unp)}</b><span class="s">${rcvPct === null ? "-" : `입금률 ${rcvPct}%`}</span></div>
         <div class="hk"><span class="l">마진</span><b class="v">${money(mar)}</b><span class="s">${marPct === null ? "-" : `마진율 ${marPct}%`}</span></div>
@@ -450,6 +485,7 @@ function renderHighlights() {
   const card = p => { const d = daysTo(p.due); return `<a class="pcard" href="#/p/${p.id}" style="--c:${SCOLOR[p.status]}">
     <span class="pc-top"><span class="pc-st"><i class="dot d-${p.status}"></i>${p.status}</span>${d !== null ? `<span class="dd ${ddClass(d)}">${dday(d)}</span>` : ""}</span>
     <b class="pc-n">${esc(p.name)}</b>
+    <span class="pc-m">${tag(catOf(p))}</span>
     <span class="pc-f"><span>${p.start ? "시작 " + dt(p.start) : ""}</span><span>${Number(p.contract) ? won(p.contract) : ""}</span></span></a>`; };
 
   el.innerHTML = `<div class="hl">
@@ -482,17 +518,18 @@ function renderContent() {
       const items = list.filter(p => p.status === s).sort(byDate);
       return `<div class="col" data-status="${s}"><h3><i class="dot d-${s}"></i>${s} <span class="muted">${items.length}</span></h3>
       ${items.map(p => `<a class="kcard" href="#/p/${p.id}" draggable="true" data-id="${p.id}"><b>${esc(p.name)}</b>
-        <small>${p.due ? "납기 " + dt(p.due) : ""}</small></a>`).join("")}</div>`;
+        <small>${tag(catOf(p))} ${p.due ? "납기 " + dt(p.due) : ""}</small></a>`).join("")}</div>`;
     }).join("")}</div>`;
   } else {
     list.sort((a, b) => (LISTORD[a.status] - LISTORD[b.status]) || byDate(a, b));
     const cell = (cls, label, val) => `<span class="c ${cls}${val ? "" : " e"}" data-l="${label}">${val || ""}</span>`;
     c.innerHTML = `<div class="tbl">
-      <div class="lh"><span class="hd-1">프로젝트</span><span class="hd-2">상태</span><span class="hd-3">등록일</span><span class="hd-4">시작일</span><span class="hd-5">납기</span><span class="hd-6">계약금액</span></div>
+      <div class="lh"><span class="hd-4">등록일</span><span class="hd-1">프로젝트</span><span class="hd-2">카테고리</span><span class="hd-3">상태</span><span class="hd-5">시작일</span><span class="hd-6">납기</span><span class="hd-7">계약금액</span></div>
       ${list.map(p => `<a class="row" href="#/p/${p.id}">
         <span class="c c-n">${esc(p.name)}</span>
         <span class="c c-s"><i class="dot d-${p.status}"></i>${p.status}</span>
         <span class="m">
+          ${cell("c-cat", "", tag(catOf(p)))}
           ${cell("c-reg", "등록", dt(regOf(p)))}
           ${cell("c-start", "시작", dt(p.start))}
           ${cell("c-due", "납기", dt(p.due))}
@@ -511,41 +548,44 @@ function renderDetail(id) {
     <span id="saved" class="muted"></span></div>
   <div class="metarow">
     <select data-f="status" aria-label="상태">${STATUSES.map(s => `<option ${p.status === s ? "selected" : ""}>${s}</option>`).join("")}</select>
+    <select data-f="category" aria-label="카테고리"><option value="">카테고리 없음</option>${CATS.map(c => `<option ${catOf(p) === c ? "selected" : ""}>${c}</option>`).join("")}</select>
   </div>
   <nav class="tabs">
-    ${[["notes", "노트"], ["budget", "버짓"], ["info", "정보·링크"]].map(([k, l]) => `<button data-act="tab" data-t="${k}" class="${detailTab === k ? "on" : ""}">${l}</button>`).join("")}
+    ${[["main", "버짓·정보"], ["notes", "노트"]].map(([k, l]) => `<button data-act="tab" data-t="${k}" class="${detailTab === k ? "on" : ""}">${l}</button>`).join("")}
   </nav>
   <div class="pane" id="pane"></div>`;
   renderPane(p);
 }
 
+const k = v => (v === "" || v == null) ? "" : String(Math.round(Number(v)) / 1000);
 function renderPane(p) {
   const el = $("#pane"); if (!el) return;
   document.querySelectorAll('[data-act="tab"]').forEach(b => b.classList.toggle("on", b.dataset.t === detailTab));
   if (detailTab === "notes") {
     el.innerHTML = `<div style="display:flex;justify-content:flex-end;margin-bottom:6px"><button class="ghost sm" data-act="today">+ 오늘 날짜</button></div>
     <textarea class="notes" id="notes" data-f="notes" placeholder="미팅 기록, 콘티 아이디어, 클라이언트 피드백">${esc(p.notes)}</textarea>`;
-  } else if (detailTab === "budget") {
-    el.innerHTML = `<div class="grid2">
-      <label class="f">계약금액(원)<input type="number" inputmode="numeric" data-f="contract" value="${p.contract ?? ""}"></label>
-      <label class="f">입금액(원)<input type="number" inputmode="numeric" data-f="received" value="${p.received ?? ""}"></label></div>
-    <div class="sum"><div><small>지출 합계</small><b id="b-exp"></b></div><div><small>마진</small><b id="b-margin"></b></div><div><small>미수금</small><b id="b-unpaid"></b></div></div>
-    <h4>지출 항목</h4><div id="exp"></div>
-    <datalist id="exl"><option value="외주비"><option value="장비 렌탈"><option value="출장비"><option value="식비"><option value="인건비"><option value="음악·폰트 라이선스"><option value="기타"></datalist>
-    <button class="ghost" data-act="addExp">+ 지출 추가</button>`;
-    renderExp(p); updateBudget(p);
   } else {
-    el.innerHTML = `<div class="grid4">
-      <label class="f">등록일<input type="date" data-f="registered" value="${esc(regOf(p))}"></label>
-      <label class="f">시작일<input type="date" data-f="start" value="${esc(p.start)}"></label>
-      <label class="f">마감일<input type="date" data-f="end" value="${esc(p.end)}"></label>
-      <label class="f">납기<input type="date" data-f="due" value="${esc(p.due)}"></label></div>
-    <h4>발주처 담당자·연락처</h4>
-    <textarea data-f="contact" rows="3" placeholder="담당자, 연락처, 메모">${esc(p.contact)}</textarea>
-    <h4>링크 (드라이브, 리뷰, 레퍼런스)</h4><div id="lks"></div>
-    <button class="ghost" data-act="addLink">+ 링크 추가</button>
+    el.innerHTML = `
+    <section class="ps"><h3 class="sh">버짓</h3>
+      <div class="grid2">
+        <label class="f">계약금액(천원)<input type="number" inputmode="decimal" placeholder="예: 353 → 353,000원" data-f="contract" value="${k(p.contract)}"></label>
+        <label class="f">입금액(천원)<input type="number" inputmode="decimal" placeholder="예: 353 → 353,000원" data-f="received" value="${k(p.received)}"></label></div>
+      <div class="sum"><div><small>지출 합계</small><b id="b-exp"></b></div><div><small>마진</small><b id="b-margin"></b></div><div><small>미수금</small><b id="b-unpaid"></b></div></div>
+      <h4>지출 항목</h4><div id="exp"></div>
+      <datalist id="exl"><option value="외주비"><option value="장비 렌탈"><option value="출장비"><option value="식비"><option value="인건비"><option value="음악·폰트 라이선스"><option value="기타"></datalist>
+      <button class="ghost" data-act="addExp">+ 지출 추가</button></section>
+    <section class="ps"><h3 class="sh">정보·링크</h3>
+      <div class="grid4">
+        <label class="f">등록일<input type="date" data-f="registered" value="${esc(regOf(p))}"></label>
+        <label class="f">시작일<input type="date" data-f="start" value="${esc(p.start)}"></label>
+        <label class="f">마감일<input type="date" data-f="end" value="${esc(p.end)}"></label>
+        <label class="f">납기<input type="date" data-f="due" value="${esc(p.due)}"></label></div>
+      <h4>발주처 담당자·연락처</h4>
+      <textarea data-f="contact" rows="3" placeholder="담당자, 연락처, 메모">${esc(p.contact)}</textarea>
+      <h4>링크 (드라이브, 리뷰, 레퍼런스)</h4><div id="lks"></div>
+      <button class="ghost" data-act="addLink">+ 링크 추가</button></section>
     <div style="margin-top:28px;text-align:right"><button class="ghost danger" data-act="delProject">프로젝트 삭제</button></div>`;
-    renderLinks(p);
+    renderExp(p); updateBudget(p); renderLinks(p);
   }
 }
 
@@ -553,7 +593,7 @@ function renderExp(p) {
   p.expenses ||= [];
   $("#exp").innerHTML = p.expenses.map((e, i) => `<div class="erow">
     <input list="exl" placeholder="항목" data-ek="n" data-i="${i}" value="${esc(e.n)}">
-    <input type="number" inputmode="numeric" placeholder="금액" data-ek="a" data-i="${i}" value="${e.a ?? ""}">
+    <input type="number" inputmode="numeric" placeholder="금액(천원)" data-ek="a" data-i="${i}" value="${k(e.a)}">
     <button class="x" data-act="delExp" data-i="${i}" aria-label="지출 삭제">✕</button></div>`).join("") || `<div class="muted" style="margin-bottom:8px">지출 항목이 없어요.</div>`;
 }
 function renderLinks(p) {
@@ -579,12 +619,12 @@ app.addEventListener("input", e => {
   const p = cur(); if (!p) return;
   if (t.dataset.f) {
     const f = t.dataset.f;
-    p[f] = NUM.includes(f) ? (t.value === "" ? "" : Number(t.value)) : t.value;
+    p[f] = NUM.includes(f) ? (t.value === "" ? "" : Math.round(Number(t.value) * 1000)) : t.value;
     if (NUM.includes(f)) updateBudget(p);
     persist(p);
   } else if (t.dataset.ek) {
     const i = +t.dataset.i;
-    p.expenses[i][t.dataset.ek] = t.dataset.ek === "a" ? (Number(t.value) || 0) : t.value;
+    p.expenses[i][t.dataset.ek] = t.dataset.ek === "a" ? Math.round((Number(t.value) || 0) * 1000) : t.value;
     updateBudget(p); persist(p);
   } else if (t.dataset.lk) {
     p.links[+t.dataset.i][t.dataset.lk] = t.value; persist(p);
@@ -592,7 +632,8 @@ app.addEventListener("input", e => {
 });
 app.addEventListener("change", e => {
   const t = e.target;
-  if (t.id === "fdone") { F.showDone = t.checked; renderContent(); }
+  if (t.id === "fcat") { F.cat = t.value; renderContent(); }
+  else if (t.id === "fdone") { F.showDone = t.checked; renderContent(); }
   else if (t.id === "fyear") { F.year = +t.value; renderContent(); }
 });
 
@@ -613,8 +654,8 @@ app.addEventListener("click", async e => {
   else if (act === "back") { flush(); location.hash = "#/"; }
   else if (act === "new") {
     const name = prompt("프로젝트 이름"); if (!name || !name.trim()) return;
-    const np = mk([name.trim(), "", "Pre", "", "", ""]);
-    projects.push(np); await store.save(np); detailTab = "notes"; location.hash = "#/p/" + np.id;
+    const np = mk([name.trim(), F.cat || "", "Pre", "", "", ""]);
+    projects.push(np); await store.save(np); detailTab = "main"; location.hash = "#/p/" + np.id;
   }
   else if (act === "seed") { await store.seed(SEED.map(mk)); }
   else if (act === "tab") { detailTab = b.dataset.t; if (p) renderPane(p); }
