@@ -123,7 +123,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .tabs a,.tabs button{padding:7px 15px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--mu);text-decoration:none;white-space:nowrap;font-size:14px;font-weight:500}
 .tabs .on{background:var(--brand);border-color:var(--brand);color:#fff}
 .filters{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
-.filters input[type=search]{flex:1;min-width:150px}
+.filters input[type=search]{flex:1;min-width:150px;max-width:240px}
+@media (max-width:760px){.filters input[type=search]{max-width:none}}
 .filters select{width:auto}
 .filters label{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--mu);white-space:nowrap}
 .filters input[type=checkbox]{width:auto}
@@ -434,7 +435,7 @@ async function firebaseStore() {
 /* ================= 상태 ================= */
 const app = $("#app");
 let store, user = null, projects = [], ready = false;
-const F = { q: "", cat: "", hideDone: false, year: CUR };
+const F = { q: "", cat: "", hideDone: false, h1: false, h2: false, year: CUR };
 let detailTab = "main";
 const pending = new Map();
 let saveTimer = null;
@@ -537,6 +538,8 @@ function renderMain() {
     <div class="filters">
       <input type="search" id="q" placeholder="프로젝트 검색" value="${esc(F.q)}">
       <select id="fcat" aria-label="카테고리"><option value="">전체 카테고리</option>${CATS.map(c => `<option ${F.cat === c ? "selected" : ""}>${c}</option>`).join("")}</select>
+      <label><input type="checkbox" id="fh1" ${F.h1 ? "checked" : ""}> 상반기</label>
+      <label><input type="checkbox" id="fh2" ${F.h2 ? "checked" : ""}> 하반기</label>
       <label><input type="checkbox" id="fdone" ${F.hideDone ? "checked" : ""}> 완료 숨기기</label>
     </div>
     <div id="content"></div>
@@ -545,11 +548,13 @@ function renderMain() {
   renderContent();
 }
 
+const monthOfP = p => +((p.start || p.due || regOf(p) || "").slice(5, 7)) || 0;
+const inHalf = p => { if (F.h1 === F.h2) return true; const m = monthOfP(p); return F.h1 ? m >= 1 && m <= 6 : m >= 7; };
 const inYear = p => !F.year || yearOf(p) === F.year;
 function filtered() {
   const q = F.q.toLowerCase();
   return projects.filter(p =>
-    inYear(p) &&
+    inYear(p) && inHalf(p) &&
     (!F.hideDone || p.status !== "완료") &&
     (!F.cat || catOf(p) === F.cat) &&
     (!q || p.name.toLowerCase().includes(q)));
@@ -762,6 +767,8 @@ app.addEventListener("input", e => {
 app.addEventListener("change", e => {
   const t = e.target;
   if (t.id === "fcat") { F.cat = t.value; renderContent(); }
+  else if (t.id === "fh1") { F.h1 = t.checked; renderContent(); }
+  else if (t.id === "fh2") { F.h2 = t.checked; renderContent(); }
   else if (t.id === "fdone") { F.hideDone = t.checked; renderContent(); }
   else if (t.id === "fyear") { F.year = +t.value; isMonthly() ? renderMain() : renderContent(); }
 });
