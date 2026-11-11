@@ -73,7 +73,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 /* 히어로 */
 .hero{background:var(--brand);color:#fff;border-radius:20px;overflow:hidden;margin-bottom:34px}
 .hero-body{padding:24px 28px 26px}
-.hero-kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.hero-kpi{display:grid;grid-template-columns:.75fr 1fr 1fr 1fr;gap:12px}
+@media (max-width:1000px) and (min-width:761px){.hero-kpi{grid-template-columns:1fr 1fr}}
 .hk{background:rgba(255,255,255,.12);border-radius:14px;padding:16px 18px;min-width:0}
 .hk.main{grid-column:1/-1;background:rgba(255,255,255,.18);padding:20px 22px;display:flex;gap:28px;align-items:stretch;justify-content:space-between}
 .mtot{flex:1;min-width:0}
@@ -661,6 +662,10 @@ function renderStats() {
   const revenue = yp.reduce((a, p) => a + (Number(p.contract) || 0), 0);
   const received = yp.reduce((a, p) => a + (Number(p.received) || 0), 0);
   const unp = yp.reduce((a, p) => a + unpaid(p), 0);
+  const doneU = yp.filter(p => p.status === "완료" && unpaid(p) > 0 && Number(p.contract) > 0);
+  const ingU = yp.filter(p => p.status === "진행중" && unpaid(p) > 0 && Number(p.contract) > 0);
+  const arDone = doneU.reduce((a, p) => a + unpaid(p), 0), arDoneN = doneU.length;
+  const arIng = ingU.reduce((a, p) => a + unpaid(p), 0), arIngN = ingU.length;
   const mar = yp.filter(p => Number(p.contract) > 0).reduce((a, p) => a + margin(p), 0);
   const marPct = revenue ? Math.round(mar / revenue * 100) : null;
   const rcvPct = revenue ? Math.round(received / revenue * 100) : null;
@@ -692,7 +697,8 @@ function renderStats() {
             <div class="hf"><span class="l">하반기 7~12월</span><b class="v">${money(sumC(h2))}</b><span class="s">${h2.length}건</span></div></div>` : ""}
         </div>
         <div class="hk"><span class="l">프로젝트</span><b class="v">${total}<em>건</em></b><span class="s">진행 중 ${active}건</span></div>
-        <div class="hk"><span class="l">미수금</span><b class="v">${money(unp)}</b><span class="s">${rcvPct === null ? "-" : `입금률 ${rcvPct}%`}</span></div>
+        <div class="hk"><span class="l">미수금 · 완료</span><b class="v">${money(arDone)}</b><span class="s">${arDoneN ? `${arDoneN}건 못 받음` : "없음"}</span></div>
+        <div class="hk"><span class="l">입금예정 · 진행중</span><b class="v">${money(arIng)}</b><span class="s">${arIngN ? `${arIngN}건 남음` : "없음"}</span></div>
         <div class="hk"><span class="l">마진</span><b class="v">${money(mar)}</b><span class="s">${marPct === null ? "-" : `마진율 ${marPct}%`}</span></div>
       </div>
       <div class="sbar" role="img" aria-label="상태별 프로젝트 비율">${total ? order.map(s => n(s) ? `<i class="d-${s}" style="width:${n(s) / total * 100}%"></i>` : "").join("") : ""}</div>
