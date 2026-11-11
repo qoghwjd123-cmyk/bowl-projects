@@ -414,7 +414,16 @@ app.addEventListener("change", e => {
 app.addEventListener("click", async e => {
   const b = e.target.closest("[data-act]"); if (!b) return;
   const act = b.dataset.act, p = cur(), i = +b.dataset.i;
-  if (act === "login") store.signIn();
+  if (act === "login") {
+    Promise.resolve(store.signIn()).catch(err => {
+      const c = err && err.code || "";
+      const hint = c === "auth/unauthorized-domain" ? "\n\nFirebase > Authentication > 설정 > 승인된 도메인에 이 사이트 도메인을 추가하세요."
+        : c === "auth/operation-not-allowed" ? "\n\nFirebase > Authentication > 로그인 방법에서 Google을 사용 설정하세요."
+        : c === "auth/popup-blocked" ? "\n\n브라우저 팝업 차단을 해제하세요."
+        : "";
+      alert("로그인 실패: " + (c || (err && err.message) || err) + hint);
+    });
+  }
   else if (act === "logout") { flush(); if (confirm("로그아웃할까요?")) store.signOut(); }
   else if (act === "back") { flush(); location.hash = "#/"; }
   else if (act === "new") {
