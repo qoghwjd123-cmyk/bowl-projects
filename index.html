@@ -655,7 +655,7 @@ function renderContent() {
         <small>${tag(catOf(p))} ${p.due ? "납기 " + dt(p.due) : ""}</small></a>`).join("")}</div>`;
     }).join("")}</div>`;
   } else {
-    list.sort((a, b) => (LISTORD[a.status] - LISTORD[b.status]) || byDate(a, b));
+    list.sort((a, b) => (a.start ? 0 : 1) - (b.start ? 0 : 1) || (a.start && b.start ? b.start.localeCompare(a.start) : (b.createdAt || 0) - (a.createdAt || 0)));
     const cell = (cls, label, val) => `<span class="c ${cls}${val ? "" : " e"}" data-l="${label}">${val || ""}</span>`;
     c.innerHTML = `<div class="tbl">
       <div class="lh"><span class="hd-5">시작일</span><span class="hd-1">프로젝트</span><span class="hd-2">카테고리</span><span class="hd-3">상태</span><span class="hd-6">납기</span><span class="hd-7">계약금액</span><span class="hd-8">정산</span></div>
