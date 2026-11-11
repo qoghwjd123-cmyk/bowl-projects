@@ -128,21 +128,24 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .filters label{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--mu);white-space:nowrap}
 .filters input[type=checkbox]{width:auto}
 .tbl{background:var(--panel);border-radius:14px;overflow:hidden}
-.lh,.row{display:grid;grid-template-columns:minmax(0,1fr) 4.8rem 7rem 5.4rem 5.4rem 7.8rem;column-gap:12px;align-items:center;padding:0 20px}
+.lh,.row{display:grid;grid-template-columns:5.4rem minmax(0,1fr) 4.8rem 7rem 5.4rem 7.8rem 5.2rem;column-gap:12px;align-items:center;padding:0 20px}
 .lh{height:40px;background:var(--soft);font-size:12.5px;color:var(--mu)}
 .row{min-height:56px;padding-top:12px;padding-bottom:12px;border-top:1px solid var(--line);text-decoration:none;color:inherit}
 .lh+.row{border-top:0}
 .row:hover{background:#fafbfc}
 .m{display:contents}
-.c-n{order:0;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.c-cat{order:1}
-.c-s{order:2;display:inline-flex;align-items:center;gap:8px;font-size:13.5px}
-.c-start{order:3}.c-due{order:4}
+.c-n{order:1;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.c-cat{order:2}
+.c-s{order:3;display:inline-flex;align-items:center;gap:8px;font-size:13.5px}
+.c-start{order:0}.c-due{order:4}
 .c-start,.c-due{font-family:var(--num);font-variant-numeric:tabular-nums;font-size:13px;color:var(--mu)}
+.c-set{order:6;text-align:right}
+.stb{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;line-height:1.5;white-space:nowrap}
+.stb.ok{background:#cdeee8;color:#0b7a6c}.stb.un{background:#fbdcd7;color:#b0382a}
 .c-amt{order:5;text-align:right;font-family:var(--num);font-variant-numeric:tabular-nums;font-size:14px}
-.lh span:last-child{text-align:right}
+.lh .hd-7,.lh .hd-8{text-align:right}
 .c::before{display:none}
-.hd-1{order:0}.hd-2{order:1}.hd-3{order:2}.hd-5{order:3}.hd-6{order:4}.hd-7{order:5}
+.hd-5{order:0}.hd-1{order:1}.hd-2{order:2}.hd-3{order:3}.hd-6{order:4}.hd-7{order:5}.hd-8{order:6}
 
 /* 카테고리 태그 */
 .tag{display:inline-block;font-size:12.5px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap;line-height:1.5}
@@ -150,6 +153,9 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .t1{background:#fbdcd7;color:#b0382a}
 .t2{background:#cdeee8;color:#0b7a6c}
 .pc-m{min-height:1.6em}
+
+/* iOS 입력 시 자동 확대 방지: 입력창 글자 16px 이상 */
+@media (max-width:900px){input,select,textarea{font-size:16px!important}}
 
 /* 빠른 추가 */
 .qa{background:var(--panel);border-radius:14px;padding:14px 16px;margin:0 0 30px;display:grid;grid-template-columns:minmax(0,1fr) 7rem 7rem 9.5rem 7rem auto;gap:10px;align-items:end}
@@ -289,9 +295,10 @@ h4{margin:18px 0 8px;font-size:14px;font-weight:600}
   .m{display:flex;flex-wrap:wrap;gap:2px 14px;grid-column:1/-1;order:3;font-size:12.5px;color:var(--mu)}
   .c-n{order:0}.c-s{order:1}
   .c::before{display:inline;content:attr(data-l) " ";color:var(--mu);opacity:.8}
-  .c-cat::before,.c-amt::before{content:""}
+  .c-cat::before,.c-amt::before,.c-set::before{content:""}
   .c.e{display:none}
   .c-amt{text-align:left;font-size:12.5px}
+  .c-set{text-align:left}
   .grid4{grid-template-columns:1fr 1fr}
   .lrow{grid-template-columns:1fr 38px 38px}
   .lrow input:first-child{grid-column:1/-1}
@@ -646,7 +653,7 @@ function renderContent() {
     list.sort((a, b) => (LISTORD[a.status] - LISTORD[b.status]) || byDate(a, b));
     const cell = (cls, label, val) => `<span class="c ${cls}${val ? "" : " e"}" data-l="${label}">${val || ""}</span>`;
     c.innerHTML = `<div class="tbl">
-      <div class="lh"><span class="hd-1">프로젝트</span><span class="hd-2">카테고리</span><span class="hd-3">상태</span><span class="hd-5">시작일</span><span class="hd-6">납기</span><span class="hd-7">계약금액</span></div>
+      <div class="lh"><span class="hd-5">시작일</span><span class="hd-1">프로젝트</span><span class="hd-2">카테고리</span><span class="hd-3">상태</span><span class="hd-6">납기</span><span class="hd-7">계약금액</span><span class="hd-8">정산</span></div>
       ${list.map(p => `<a class="row" href="#/p/${p.id}">
         <span class="c c-n">${esc(p.name)}</span>
         <span class="c c-s"><i class="dot d-${p.status}"></i>${p.status}</span>
@@ -655,6 +662,7 @@ function renderContent() {
           ${cell("c-start", "시작", dt(p.start))}
           ${cell("c-due", "납기", dt(p.due))}
           ${cell("c-amt", "", Number(p.contract) ? won(p.contract) : "")}
+          ${cell("c-set", "", Number(p.contract) ? (unpaid(p) > 0 ? `<span class="stb un">미수</span>` : `<span class="stb ok">정산완료</span>`) : "")}
         </span></a>`).join("")}</div>`;
   }
 }
@@ -765,7 +773,7 @@ app.addEventListener("submit", async e => {
   const np = mk([name, $("#qa-c").value, $("#qa-s").value, $("#qa-d").value, "", ""]);
   const b = $("#qa-b").value; if (b !== "") np.contract = Math.round(Number(b) * 1000);
   projects.push(np); renderContent();
-  e.target.reset(); $("#qa-n").focus();
+  e.target.reset(); if (document.activeElement) document.activeElement.blur(); window.scrollTo({ top: 0 });
   try { await store.save(np); } catch (err) { alert("저장 실패: " + (err.code || err.message)); }
 });
 app.addEventListener("click", async e => {
