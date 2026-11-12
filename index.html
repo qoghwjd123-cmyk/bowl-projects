@@ -109,7 +109,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .sbar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:rgba(255,255,255,.22);margin:22px 0 10px}
 .sbar i{display:block;height:100%}
 .sbar.cat{margin:18px 0 10px}
-.hero .cc0{background:#ffffff}.hero .cc1{background:#ff8a78}.hero .cc2{background:#b69cff}.hero .ccn{background:#8f9bc4}
+.hero .cc0{background:#ffffff}.hero .cc1{background:#ff8a78}.hero .cc2{background:#ffd43b}.hero .ccn{background:#8f9bc4}
 .legend.cat{margin-top:0}
 .legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:rgba(255,255,255,.92)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
@@ -258,10 +258,10 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .li .pt{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 7px;border-radius:99px;background:#dfe5fb;color:var(--brand);margin-right:6px}
 .li .pt.etc{background:#e6e9ee;color:var(--mu)}
 .li .nb{width:20px}
-.cat{display:grid;grid-template-columns:6.5rem minmax(0,1fr) 7rem;gap:10px;align-items:center;padding:8px 0;font-size:14px}
-.cat .bg{height:8px;border-radius:4px;background:var(--soft);overflow:hidden}
-.cat .bg i{display:block;height:100%;background:var(--coral);border-radius:4px}
-.cat .a{text-align:right;font-family:var(--num);font-variant-numeric:tabular-nums;font-weight:600}
+.lcat{display:grid;grid-template-columns:6.5rem minmax(0,1fr) 7rem;gap:10px;align-items:center;padding:8px 0;font-size:14px}
+.lcat .bg{height:8px;border-radius:4px;background:var(--soft);overflow:hidden}
+.lcat .bg i{display:block;height:100%;background:var(--coral);border-radius:4px}
+.lcat .a{text-align:right;font-family:var(--num);font-variant-numeric:tabular-nums;font-weight:600}
 .tot{display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:10px;margin-top:6px;font-weight:700;font-size:14px}
 .tot b{font-family:var(--num)}
 .qa2{background:var(--panel);border-radius:14px;padding:14px 16px;margin:0 0 22px;display:grid;gap:10px;align-items:end}
@@ -319,7 +319,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
   .xr .xm{display:flex;gap:8px;align-items:center;grid-column:1/-1;grid-row:2;font-size:12.5px;color:var(--mu)}
   .xr .pj,.xr .vbw{display:none}
   .xr.t .it{grid-column:1}
-  .cat{grid-template-columns:5.5rem minmax(0,1fr) 6.2rem}
+  .lcat{grid-template-columns:5.5rem minmax(0,1fr) 6.2rem}
   .chart{gap:4px}.mlab{gap:4px}.mlab span{font-size:11px}
   .yt .xr{grid-template-columns:3rem repeat(3,minmax(0,1fr));column-gap:8px;padding:0 14px;font-size:13px}
   .yt .xr.h{display:grid}
@@ -991,7 +991,7 @@ function lgHTML() {
   const incList = c.pin.map(x => `<div class="li ${x.on ? "" : "off"}"><button type="button" class="cb" data-act="lgEx" data-id="${x.id}" aria-label="계산에 포함" aria-pressed="${x.on}"></button><a class="t" href="#/p/${x.id}"><b>${esc(x.name)}</b><span><span class="pt">프로젝트</span>${dt(x.date).slice(3)}</span></a><span class="a">${won(x.amount)}</span></div>`).join("")
     + c.oin.map(x => `<div class="li"><span class="nb"></span><span class="t"><b>${esc(x.memo || x.cat)}</b><span><span class="pt etc">${esc(x.cat || "기타 수입")}</span>${dt(x.date).slice(3)}</span></span><span class="a">${won(x.amount)}</span></div>`).join("");
   const mxc = Math.max(1, ...Object.values(c.cats));
-  const catBars = Object.entries(c.cats).sort((a, b) => b[1] - a[1]).map(([n, a]) => `<div class="cat"><span>${esc(n)}</span><span class="bg"><i style="width:${a / mxc * 100}%"></i></span><span class="a">${won(a)}</span></div>`).join("") || `<div class="emp2">생활비 기록이 없어요.</div>`;
+  const catBars = Object.entries(c.cats).sort((a, b) => b[1] - a[1]).map(([n, a]) => `<div class="lcat"><span>${esc(n)}</span><span class="bg"><i style="width:${a / mxc * 100}%"></i></span><span class="a">${won(a)}</span></div>`).join("") || `<div class="emp2">생활비 기록이 없어요.</div>`;
   const recent = [...c.ent].sort((a, b) => (b.date || "").localeCompare(a.date || "") || (b.createdAt || 0) - (a.createdAt || 0));
   const cats = LG.type === "in" ? LG_IN : LG_OUT;
   return head + `<div class="sum3">
@@ -1075,7 +1075,7 @@ const byDate = (a, b) => (a.start || a.due || regOf(a) || "9999").localeCompare(
 
 function hkPanel(yp) {
   const k = F.open; if (!k) return "";
-  const dot = p => { const c = catOf(p); return `<i style="background:${c ? ["#fff", "#ff8a78", "#b69cff"][CATS.indexOf(c)] : "#8f9bc4"}"></i>`; };
+  const dot = p => { const c = catOf(p); return `<i style="background:${c ? ["#fff", "#ff8a78", "#ffd43b"][CATS.indexOf(c)] : "#8f9bc4"}"></i>`; };
   const num = v => Number(v) || 0;
   let list, title, cols, valFn, sum;
   if (k === "proj") {
