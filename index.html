@@ -76,6 +76,22 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .hero-kpi{display:grid;grid-template-columns:.75fr 1fr 1fr 1fr;gap:12px}
 @media (max-width:1000px) and (min-width:761px){.hero-kpi{grid-template-columns:1fr 1fr}}
 .hk{background:rgba(255,255,255,.12);border-radius:14px;padding:16px 18px;min-width:0}
+.hk.tap{cursor:pointer;position:relative;transition:none}
+.hk.tap:hover{background:rgba(255,255,255,.18)}
+.hk.tap.on{background:rgba(255,255,255,.26);box-shadow:inset 0 0 0 2px rgba(255,255,255,.55)}
+.hk.tap .l::after{content:"▾";margin-left:6px;font-size:11px;opacity:.8}
+.hk.tap.on .l::after{content:"▴"}
+.hkp{margin-top:12px;background:rgba(255,255,255,.14);border-radius:14px;padding:6px 18px 10px}
+.hkp h4{margin:12px 0 6px;font-size:14px;font-weight:600;color:#fff}
+.hkp a{display:grid;grid-template-columns:minmax(0,1fr) 9rem 9rem;gap:12px;align-items:center;padding:10px 0;color:#fff;text-decoration:none;border-top:1px solid rgba(255,255,255,.2);font-size:14px}
+.hkp a:first-of-type{border-top:0}
+.hkp a:hover .nm{text-decoration:underline}
+.hkp .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hkp .nm i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px}
+.hkp a span:nth-child(n+2){text-align:right;font-family:var(--num);font-variant-numeric:tabular-nums;white-space:nowrap}
+.hkp a span:nth-child(3){font-weight:700}
+.hkp .emp{padding:14px 0;color:rgba(255,255,255,.85);font-size:14px}
+.hkp .sumr{display:flex;justify-content:space-between;padding:10px 0 2px;border-top:1px solid rgba(255,255,255,.35);font-size:13.5px;font-weight:700}
 .hk.main{grid-column:1/-1;background:rgba(255,255,255,.18);padding:20px 22px;display:flex;gap:28px;align-items:stretch;justify-content:space-between}
 .mtot{flex:1;min-width:0}
 .halves{display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:none;width:min(50%,460px)}
@@ -328,6 +344,9 @@ h4{margin:18px 0 8px;font-size:14px;font-weight:600}
   .hero-body{padding:18px 16px 20px}
   .hero-kpi{grid-template-columns:1fr;gap:8px}
   .hk{padding:12px 14px}
+  .hkp{padding:4px 14px 8px}
+  .hkp a{grid-template-columns:minmax(0,1fr) auto;gap:8px}
+  .hkp a span:nth-child(2){display:none}
   .hk.main{padding:16px 16px;flex-direction:column;gap:14px}
   .halves{width:100%;grid-template-columns:1fr;gap:8px}
   .hf{display:grid;grid-template-columns:1fr auto;column-gap:10px;align-items:baseline;padding:12px 14px}
@@ -491,7 +510,7 @@ async function firebaseStore() {
 /* ================= 상태 ================= */
 const app = $("#app");
 let store, user = null, projects = [], ready = false;
-const F = { q: "", cat: "", hideDone: false, h1: false, h2: false, year: CUR };
+const F = { q: "", cat: "", hideDone: false, h1: false, h2: false, year: CUR, open: "" };
 let detailTab = "main";
 const pending = new Map();
 let saveTimer = null;
@@ -653,6 +672,23 @@ function filtered() {
 }
 const byDate = (a, b) => (a.start || a.due || regOf(a) || "9999").localeCompare(b.start || b.due || regOf(b) || "9999");
 
+function hkPanel(yp) {
+  const k = F.open; if (!k) return "";
+  const dot = p => { const c = catOf(p); return `<i style="background:${c ? ["#fff", "#ff8a78", "#b69cff"][CATS.indexOf(c)] : "#8f9bc4"}"></i>`; };
+  const num = v => Number(v) || 0;
+  let list, title, cols, valFn, sum;
+  if (k === "proj") {
+    list = yp.filter(p => p.status === "진행중").sort((a, b) => (b.start || "").localeCompare(a.start || ""));
+    title = `진행중 프로젝트 ${list.length}건`; valFn = p => num(p.contract) ? won(p.contract) : "–"; sum = null;
+    return `<div class="hkp"><h4>${title}</h4>${list.length ? list.map(p => `<a href="#/p/${p.id}"><span class="nm">${dot(p)}${esc(p.name)}</span><span>${p.due ? "납기 " + dt(p.due) : p.start ? "시작 " + dt(p.start) : ""}</span><span>${valFn(p)}</span></a>`).join("") : `<div class="emp">진행중인 프로젝트가 없어요.</div>`}</div>`;
+  }
+  const st = k === "ar" ? "완료" : "진행중";
+  list = yp.filter(p => p.status === st && num(p.contract) > 0 && unpaid(p) > 0).sort((a, b) => unpaid(b) - unpaid(a));
+  sum = list.reduce((t, p) => t + unpaid(p), 0);
+  title = k === "ar" ? `못 받은 돈 (완료) ${list.length}건` : `받을 돈 (진행중) ${list.length}건`;
+  return `<div class="hkp"><h4>${title}</h4>${list.length ? list.map(p => `<a href="#/p/${p.id}"><span class="nm">${dot(p)}${esc(p.name)}</span><span>계약 ${won(num(p.contract))}</span><span>${won(unpaid(p))}</span></a>`).join("") + `<div class="sumr"><span>합계</span><span>${won(sum)}</span></div>` : `<div class="emp">${k === "ar" ? "미수금이 없어요." : "입금 예정인 금액이 없어요."}</div>`}</div>`;
+}
+
 function renderStats() {
   const el = $("#stats"); if (!el) return;
   const years = [...new Set([...projects.map(yearOf), CUR])].sort((a, b) => b - a);
@@ -695,11 +731,12 @@ function renderStats() {
             <div class="hf"><span class="l">상반기 1~6월</span><b class="v">${money(sumC(h1))}</b><span class="s">${h1.length}건</span></div>
             <div class="hf"><span class="l">하반기 7~12월</span><b class="v">${money(sumC(h2))}</b><span class="s">${h2.length}건</span></div></div>` : ""}
         </div>
-        <div class="hk"><span class="l">프로젝트</span><b class="v">${total}<em>건</em></b><span class="s">진행 중 ${active}건</span></div>
-        <div class="hk"><span class="l">미수금 · 완료</span><b class="v">${money(arDone)}</b><span class="s">${arDoneN ? `${arDoneN}건 못 받음` : "없음"}</span></div>
-        <div class="hk"><span class="l">입금예정 · 진행중</span><b class="v">${money(arIng)}</b><span class="s">${arIngN ? `${arIngN}건 남음` : "없음"}</span></div>
+        <div class="hk tap ${F.open === "proj" ? "on" : ""}" data-act="hk" data-k="proj" role="button" tabindex="0"><span class="l">프로젝트</span><b class="v">${total}<em>건</em></b><span class="s">진행 중 ${active}건</span></div>
+        <div class="hk tap ${F.open === "ar" ? "on" : ""}" data-act="hk" data-k="ar" role="button" tabindex="0"><span class="l">미수금 · 완료</span><b class="v">${money(arDone)}</b><span class="s">${arDoneN ? `${arDoneN}건 못 받음` : "없음"}</span></div>
+        <div class="hk tap ${F.open === "exp" ? "on" : ""}" data-act="hk" data-k="exp" role="button" tabindex="0"><span class="l">입금예정 · 진행중</span><b class="v">${money(arIng)}</b><span class="s">${arIngN ? `${arIngN}건 남음` : "없음"}</span></div>
         <div class="hk"><span class="l">마진</span><b class="v">${money(mar)}</b><span class="s">${marPct === null ? "-" : `마진율 ${marPct}%`}</span></div>
       </div>
+      ${hkPanel(yp)}
       <div class="sbar" role="img" aria-label="상태별 프로젝트 비율">${total ? order.map(s => n(s) ? `<i class="d-${s}" style="width:${n(s) / total * 100}%"></i>` : "").join("") : ""}</div>
       <div class="legend">${order.map(s => `<span><i class="dot d-${s}"></i>${s} ${n(s)}</span>`).join("")}</div>
       ${total ? `<div class="sbar cat" role="img" aria-label="카테고리별 프로젝트 비율">${cats.map(c => c.n ? `<i class="cc${c.k}" style="width:${c.n / total * 100}%"></i>` : "").join("")}</div>
@@ -897,6 +934,7 @@ app.addEventListener("click", async e => {
       alert("로그인 실패: " + (c || (err && err.message) || err) + hint);
     });
   }
+  else if (act === "hk") { F.open = F.open === b.dataset.k ? "" : b.dataset.k; renderStats(); }
   else if (act === "logout") { flush(); if (confirm("로그아웃할까요?")) store.signOut(); }
   else if (act === "back") { flush(); location.hash = "#/"; }
   else if (act === "new") {
