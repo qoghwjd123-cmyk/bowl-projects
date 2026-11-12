@@ -98,7 +98,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .halves{display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:none;width:min(50%,460px)}
 .hf{background:rgba(255,255,255,.12);border-radius:12px;padding:14px 16px;min-width:0;display:flex;flex-direction:column;justify-content:space-between}
 .hk .l{display:block;font-size:13px;color:rgba(255,255,255,.86);margin-bottom:10px}
-.hk .big{display:block;font-family:var(--num);font-stretch:112%;font-variant-numeric:tabular-nums;font-weight:700;font-size:clamp(38px,7vw,68px);line-height:1;letter-spacing:-.03em;white-space:nowrap}
+.hk .big{display:block;font-family:var(--num);font-stretch:112%;font-variant-numeric:tabular-nums;font-weight:700;font-size:clamp(32px,5.6vw,54px);line-height:1;letter-spacing:-.03em;white-space:nowrap}
 .hk .v{display:block;font-family:var(--num);font-stretch:108%;font-variant-numeric:tabular-nums;font-weight:700;font-size:clamp(22px,3vw,30px);line-height:1.1;letter-spacing:-.02em;white-space:nowrap}
 .hk em{font-style:normal;font-family:var(--sans);font-stretch:100%;font-weight:600;color:rgba(255,255,255,.82);margin-left:.18em}
 .hk .big em{font-size:.3em}
@@ -494,6 +494,33 @@ input[type=date]::-webkit-inner-spin-button{display:none}
   .wsum{grid-template-columns:1fr 1fr}
 }
 
+.shw{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+.shl{display:block;font-size:13px;color:var(--mu);margin-bottom:8px}
+.shl i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--t-shoot);margin-right:6px;vertical-align:0}
+.shl small{font-size:12px;opacity:.8;margin-left:6px}
+.shr{display:grid;grid-template-columns:10rem 8rem minmax(0,1fr) 38px;gap:6px;margin-bottom:6px}
+.shr input{min-width:0;width:100%}
+.shr input[type=date]{border-left:3px solid var(--t-shoot)}
+@media (max-width:760px){.shr{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 38px}.shr [data-sh=memo]{grid-column:1/3;grid-row:2}}
+
+@media (max-width:1100px) and (min-width:761px){.qa{grid-template-columns:minmax(0,1fr) 7rem 7rem 9.5rem}.qa .nm{grid-column:1/-1}}
+
+/* 파란 박스 접기 */
+.hmore{display:flex;justify-content:flex-end;margin-top:10px}
+.hero-more{border:0;background:rgba(255,255,255,.16);color:#fff;font-weight:600;font-size:13px;padding:7px 14px;border-radius:999px;cursor:pointer}
+.hero-more:hover{background:rgba(255,255,255,.26)}
+.hero.compact .halves,.hero.compact [data-k=ar],.hero.compact .hk-m,.hero.compact .sbar,.hero.compact .legend{display:none}
+.hero.compact .hero-kpi{grid-template-columns:1.5fr 1fr 1fr}
+.hero.compact .hero-kpi>.hk.main{grid-column:auto;padding:16px 20px}
+.hero.compact .hero-kpi>[data-k=exp]{order:10}.hero.compact .hero-kpi>[data-k=proj]{order:20}
+.hero.compact .hero-kpi>.hkp{order:50}
+.hero.compact .hk .big{font-size:clamp(28px,3.6vw,40px)}
+.hero.compact .hmore{margin-top:12px}
+@media (max-width:760px){
+  .hero.compact .hero-kpi{grid-template-columns:1fr}
+  .hero.compact .hero-kpi>.hkp{order:var(--pc)}
+}
+
 /* 가계부 달력 */
 .calw{margin-top:22px}
 .cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
@@ -520,7 +547,7 @@ input[type=date]::-webkit-inner-spin-button{display:none}
 }
 
 /* 빠른 추가 */
-.qa{background:var(--panel);border-radius:14px;padding:14px 16px;margin:0 0 30px;display:grid;grid-template-columns:minmax(0,1fr) 7rem 7rem 9.5rem 7rem auto;gap:10px;align-items:end}
+.qa{background:var(--panel);border-radius:14px;padding:14px 16px;margin:0 0 30px;display:grid;grid-template-columns:minmax(0,1fr) 7rem 7rem 9.5rem 9.5rem 7rem auto;gap:10px;align-items:end}
 .qa label{display:block;font-size:12.5px;color:var(--mu)}
 .qa label input,.qa label select{margin-top:5px}
 .qa .btn{height:42px}
@@ -1185,8 +1212,9 @@ function plEvents() {
   projects.forEach(p => {
     const ty = catOf(p) === "촬영" ? "shoot" : "bowl";
     if (p.start) list.push({ id: "st_" + p.id, auto: "start", type: ty, date: p.start, time: "", title: p.name, projectId: p.id });
-    if (p.end && p.end !== p.start) list.push({ id: "en_" + p.id, auto: "end", type: ty, date: p.end, time: "", title: p.name, projectId: p.id });
-    if (p.due && p.status !== "완료") list.push({ id: "due_" + p.id, auto: "due", type: "bowl", date: p.due, time: "", title: `${p.name} 납기`, projectId: p.id });
+    (p.shoots || []).forEach((x, i) => { if (x.date) list.push({ id: `sh_${p.id}_${i}`, auto: "shoot", type: "shoot", date: x.date, time: x.time || "", title: p.name, memo: x.memo || "", projectId: p.id }); });
+    const dueD = p.due || p.end;
+    if (dueD && p.status !== "완료") list.push({ id: "due_" + p.id, auto: "due", type: "bowl", date: dueD, time: "", title: `${p.name} 납기`, projectId: p.id });
     if (p.payDue && Number(p.contract) > 0 && unpaid(p) > 0) list.push({ id: "pay_" + p.id, auto: "pay", type: "bowl", date: p.payDue, time: "", title: `${p.name} 입금 예정 ${man(unpaid(p))}`, projectId: p.id });
   });
   return list;
@@ -1196,10 +1224,10 @@ const evSort = (a, b) => (a.time ? 0 : 1) - (b.time ? 0 : 1) || (a.time || "").l
 function evCard(e) {
   const t = PTYPE[e.type] || PTYPE.bowl;
   const pj = e.projectId && projName(e.projectId);
-  const lab = e.auto === "due" ? "납기" : e.auto === "pay" ? "입금 예정" : e.auto === "start" ? "시작" : e.auto === "end" ? "마감" : e.time || "종일";
+  const lab = e.auto === "due" ? "납기" : e.auto === "pay" ? "입금 예정" : e.auto === "start" ? "시작" : e.auto === "shoot" ? (e.time || "촬영일") : e.time || "종일";
   const open = PL.ev === e.id && !e.auto;
   const title = e.auto ? esc(e.title.replace(` 납기`, "").replace(/ 입금 예정 .*/, "")) : esc(e.title) || "(내용 없음)";
-  const sub = e.auto === "pay" ? esc(e.title.match(/입금 예정 (.*)$/)?.[1] || "") : (pj && !e.auto ? esc(pj) : "");
+  const sub = e.auto === "pay" ? esc(e.title.match(/입금 예정 (.*)$/)?.[1] || "") : e.auto === "shoot" ? esc(e.memo || "") : (pj && !e.auto ? esc(pj) : "");
   return `<div class="ev ${e.auto ? "auto" : ""} ${open ? "open" : ""}" style="--c:${t.c}">
     <button type="button" class="evb" data-act="${e.auto ? "plGo" : "plEv"}" data-id="${e.auto ? e.projectId : e.id}">
       <span class="tm"><span>${lab}</span><em>${t.l}</em></span><b>${title}</b>${sub ? `<small>${sub}</small>` : ""}</button>
@@ -1248,7 +1276,7 @@ function plHTML() {
   return `
   <div class="pl-h"><h2>${thisWeek ? "이번 주" : `${st.getMonth() + 1}월 ${wkNo}주차`}<small>${r.label}</small></h2>
     <div class="ctl"><button type="button" class="today-btn" data-act="plToday">오늘</button><div class="pnav"><button type="button" data-act="plNav" data-v="-1" aria-label="이전 주">‹</button><b>${st.getMonth() + 1}월 ${wkNo}주차</b><button type="button" data-act="plNav" data-v="1" aria-label="다음 주">›</button></div></div></div>
-  <div class="lgd"><span><i style="background:var(--t-shoot)"></i>촬영</span><span><i style="background:var(--t-bowl)"></i>보울</span><span>점선 = 프로젝트에서 자동 (시작 · 마감 · 납기 · 입금 예정일)</span></div>
+  <div class="lgd"><span><i style="background:var(--t-shoot)"></i>촬영</span><span><i style="background:var(--t-bowl)"></i>보울</span><span>점선 = 프로젝트에서 자동 (시작 · 촬영일 · 납기 · 입금 예정일)</span></div>
   <form class="qa3" id="plf" autocomplete="off"><b>일정 추가</b>
     <input type="date" name="date" value="${PL.formDate || (thisWeek ? today : r.from)}" required aria-label="날짜">
     <input name="time" inputmode="numeric" placeholder="시간 (예: 930)" maxlength="5" aria-label="시간 (비우면 종일)">
@@ -1309,6 +1337,7 @@ function renderMain() {
     <label>카테고리<select id="qa-c"><option value="">없음</option>${CATS.map(c => `<option>${c}</option>`).join("")}</select></label>
     <label>상태<select id="qa-s">${STATUSES.map(x => `<option>${x}</option>`).join("")}</select></label>
     <label>시작일<input id="qa-d" type="date"></label>
+    <label>촬영일<input id="qa-sh" type="date"></label>
     <label title="275.3 입력 → 275만 3천원">버짓(만원)<input id="qa-b" type="number" step="any" inputmode="decimal" placeholder="예: 275.3"></label>
     <button class="btn" type="submit">+ 추가</button>
   </form>
@@ -1349,15 +1378,16 @@ function hkPanel(yp) {
   if (k === "proj") {
     list = yp.filter(p => p.status === "진행중").sort((a, b) => (b.start || "").localeCompare(a.start || ""));
     title = `진행중 프로젝트 ${list.length}건`; valFn = p => num(p.contract) ? won(p.contract) : "–"; sum = null;
-    return `<div class="hkp" style="--po:15;--pt:25"><h4>${title}</h4>${list.length ? list.map(p => `<a href="#/p/${p.id}"><span class="nm">${dot(p)}${esc(p.name)}</span><span>${p.due ? "납기 " + dt(p.due) : p.start ? "시작 " + dt(p.start) : ""}</span><span>${valFn(p)}</span></a>`).join("") : `<div class="emp">진행중인 프로젝트가 없어요.</div>`}</div>`;
+    return `<div class="hkp" style="--po:15;--pt:25;--pc:25"><h4>${title}</h4>${list.length ? list.map(p => `<a href="#/p/${p.id}"><span class="nm">${dot(p)}${esc(p.name)}</span><span>${p.due ? "납기 " + dt(p.due) : p.start ? "시작 " + dt(p.start) : ""}</span><span>${valFn(p)}</span></a>`).join("") : `<div class="emp">진행중인 프로젝트가 없어요.</div>`}</div>`;
   }
   const st = k === "ar" ? "완료" : "진행중";
   list = yp.filter(p => p.status === st && num(p.contract) > 0 && unpaid(p) > 0).sort((a, b) => (a.payDue ? 0 : 1) - (b.payDue ? 0 : 1) || (a.payDue || "").localeCompare(b.payDue || "") || unpaid(b) - unpaid(a));
   sum = list.reduce((t, p) => t + unpaid(p), 0);
   title = k === "ar" ? `못 받은 돈 (완료) ${list.length}건` : `받을 돈 (진행중) ${list.length}건`;
-  return `<div class="hkp" style="--po:${k === "ar" ? 25 : 35};--pt:${k === "ar" ? 25 : 45}"><h4>${title}</h4>${list.length ? list.map(p => `<a href="#/p/${p.id}"><span class="nm">${dot(p)}${esc(p.name)}${p.payDue ? ` <span class="pdd ${daysTo(p.payDue) < 0 ? "late" : daysTo(p.payDue) <= 7 ? "soon" : ""}">${dt(p.payDue).slice(3)} ${daysTo(p.payDue) < 0 ? `${-daysTo(p.payDue)}일 지남` : dday(daysTo(p.payDue))}</span>` : ""}</span><span>계약 ${won(num(p.contract))}</span><span>${won(unpaid(p))}</span></a>`).join("") + `<div class="sumr"><span>합계</span><span>${won(sum)}</span></div>` : `<div class="emp">${k === "ar" ? "미수금이 없어요." : "입금 예정인 금액이 없어요."}</div>`}</div>`;
+  return `<div class="hkp" style="--po:${k === "ar" ? 25 : 35};--pt:${k === "ar" ? 25 : 45};--pc:15"><h4>${title}</h4>${list.length ? list.map(p => `<a href="#/p/${p.id}"><span class="nm">${dot(p)}${esc(p.name)}${p.payDue ? ` <span class="pdd ${daysTo(p.payDue) < 0 ? "late" : daysTo(p.payDue) <= 7 ? "soon" : ""}">${dt(p.payDue).slice(3)} ${daysTo(p.payDue) < 0 ? `${-daysTo(p.payDue)}일 지남` : dday(daysTo(p.payDue))}</span>` : ""}</span><span>계약 ${won(num(p.contract))}</span><span>${won(unpaid(p))}</span></a>`).join("") + `<div class="sumr"><span>합계</span><span>${won(sum)}</span></div>` : `<div class="emp">${k === "ar" ? "미수금이 없어요." : "입금 예정인 금액이 없어요."}</div>`}</div>`;
 }
 
+let heroFull = false; try { heroFull = localStorage.getItem("bowl_hero_full") === "1"; } catch (err) {}
 function renderStats() {
   const el = $("#stats"); if (!el) return;
   const years = [...new Set([...projects.map(yearOf), CUR])].sort((a, b) => b - a);
@@ -1388,7 +1418,7 @@ function renderStats() {
     <h2 class="page-name">${COMPANY}</h2>
     <select id="fyear" aria-label="연도"><option value="0" ${F.year === 0 ? "selected" : ""}>전체 연도</option>${years.map(y => `<option value="${y}" ${F.year === y ? "selected" : ""}>${y}년</option>`).join("")}</select>
   </div>
-  <section class="hero">
+  <section class="hero ${heroFull ? "" : "compact"}">
     <div class="clap" aria-hidden="true"></div>
     <div class="hero-body">
       <div class="hero-kpi">
@@ -1410,6 +1440,7 @@ function renderStats() {
       <div class="legend">${order.map(s => `<span><i class="dot d-${s}"></i>${s} ${n(s)}</span>`).join("")}</div>
       ${total ? `<div class="sbar cat" role="img" aria-label="카테고리별 프로젝트 비율">${cats.map(c => c.n ? `<i class="cc${c.k}" style="width:${c.n / total * 100}%"></i>` : "").join("")}</div>
       <div class="legend cat">${cats.map(c => c.n ? `<span><i class="dot cc${c.k}"></i>${c.name} ${c.n}건 (${Math.round(c.n / total * 100)}%)</span>` : "").join("")}</div>` : ""}
+      <div class="hmore"><button type="button" class="hero-more" data-act="heroFull" aria-expanded="${heroFull}">${heroFull ? "접기 ▴" : "전체 보기 ▾"}</button></div>
     </div>
   </section>`;
 }
@@ -1523,17 +1554,19 @@ function renderPane(p) {
       <div class="tgrow">
         <div class="tgf"><span class="tgl">상태</span><div class="tg" role="group" aria-label="상태">${STATUSES.map(s => `<button type="button" class="tgb st${STATUSES.indexOf(s)} ${p.status === s ? "on" : ""}" data-act="setF" data-f="status" data-v="${s}" aria-pressed="${p.status === s}">${s}</button>`).join("")}</div></div>
         <div class="tgf"><span class="tgl">카테고리</span><div class="tg" role="group" aria-label="카테고리"><button type="button" class="tgb cn ${!catOf(p) ? "on" : ""}" data-act="setF" data-f="category" data-v="" aria-pressed="${!catOf(p)}">없음</button>${CATS.map((c, i) => `<button type="button" class="tgb c${i} ${catOf(p) === c ? "on" : ""}" data-act="setF" data-f="category" data-v="${c}" aria-pressed="${catOf(p) === c}">${c}</button>`).join("")}</div></div></div>
-      <div class="grid4 dbox">
-        <label class="f">등록일<input type="date" data-f="registered" value="${esc(regOf(p))}"></label>
-        <label class="f">시작일<input type="date" data-f="start" value="${esc(p.start)}"></label>
-        <label class="f">마감일<input type="date" data-f="end" value="${esc(p.end)}"></label>
-        <label class="f">납기<input type="date" data-f="due" value="${esc(p.due)}"></label></div>
+      <div class="dbox">
+        <div class="grid3">
+          <label class="f">등록일<input type="date" data-f="registered" value="${esc(regOf(p))}"></label>
+          <label class="f">시작일<input type="date" data-f="start" value="${esc(p.start)}"></label>
+          <label class="f">납기<input type="date" data-f="due" value="${esc(p.due || "")}" ${!p.due && p.end ? `placeholder="${esc(p.end)}"` : ""}></label></div>
+        <div class="shw"><span class="shl"><i></i>촬영일 <small>플래너에 촬영으로 표시돼요</small></span><div id="shoots"></div>
+          <button type="button" class="ghost sm" data-act="addShoot">+ 촬영일 추가</button></div></div>
       <h4>발주처 담당자·연락처</h4>
       <textarea data-f="contact" rows="3" placeholder="담당자, 연락처, 메모">${esc(p.contact)}</textarea>
       <h4>링크 (드라이브, 리뷰, 레퍼런스)</h4><div id="lks"></div>
       <button class="ghost" data-act="addLink">+ 링크 추가</button></section>
     <div style="margin-top:28px;text-align:right"><button class="ghost danger" data-act="delProject">프로젝트 삭제</button></div>`;
-    renderExp(p); updateBudget(p); renderLinks(p);
+    renderExp(p); updateBudget(p); renderLinks(p); renderShoots(p);
   }
 }
 
@@ -1546,6 +1579,11 @@ function renderExp(p) {
     <input type="number" step="any" inputmode="decimal" placeholder="만원" data-xe="amount" data-id="${e.id}" value="${k(e.amount)}" aria-label="금액(만원)">
     <select data-xe="vat" data-id="${e.id}" aria-label="부가세">${Object.entries(VATL).map(([v, l]) => `<option value="${v}" ${e.vat === v ? "selected" : ""}>${v === "wh" ? "3.3% 원천" : "VAT " + l}</option>`).join("")}</select>
     <button class="x" data-act="delExp" data-id="${e.id}" aria-label="지출 삭제">✕</button></div>`).join("") || `<div class="muted" style="margin-bottom:8px">지출 항목이 없어요.</div>`;
+}
+function renderShoots(p) {
+  const el = $("#shoots"); if (!el) return;
+  const list = p.shoots || [];
+  el.innerHTML = list.map((x, i) => `<div class="shr"><input type="date" data-sh="date" data-i="${i}" value="${esc(x.date || "")}" aria-label="촬영일"><input data-sh="time" data-i="${i}" value="${esc(x.time || "")}" inputmode="numeric" maxlength="5" placeholder="시간 (예: 930)" aria-label="촬영 시간"><input data-sh="memo" data-i="${i}" value="${esc(x.memo || "")}" placeholder="메모 (장소 등)" aria-label="메모"><button type="button" class="x" data-act="delShoot" data-i="${i}" aria-label="촬영일 삭제">✕</button></div>`).join("");
 }
 function renderLinks(p) {
   p.links ||= [];
@@ -1588,6 +1626,9 @@ app.addEventListener("input", e => {
     if (f === "received" && Number(p.received) > 0 && !p.paidDate) { p.paidDate = todayStr(); const pdI = $('[data-f="paidDate"]'); if (pdI) pdI.value = p.paidDate; }
     if (NUM.includes(f)) updateBudget(p);
     persist(p);
+  } else if (t.dataset.sh) {
+    const i = +t.dataset.i; p.shoots ||= []; if (!p.shoots[i]) return;
+    p.shoots[i][t.dataset.sh] = t.dataset.sh === "time" ? fmtTime(t.value) : t.value; persist(p);
   } else if (t.dataset.lk) {
     p.links[+t.dataset.i][t.dataset.lk] = t.value; persist(p);
   }
@@ -1598,6 +1639,7 @@ app.addEventListener("change", e => {
   else if (t.id === "excat") { EX.cat = t.value; renderMain(); }
   else if (t.dataset.xe && isExp()) { flushExp(); viewDirty = true; }
   else if (t.name === "time" && t.form && t.form.id === "plf") { t.value = fmtTime(t.value); }
+  else if (t.dataset.sh === "time") { t.value = fmtTime(t.value); }
   else if (t.dataset.se && /date|time|type/.test(t.dataset.se)) { if (t.dataset.se === "time") t.value = fmtTime(t.value); if (t.dataset.se === "date") { PL.anchor = t.value || PL.anchor; PL.calM = PL.anchor.slice(0, 7); } viewDirty = true; }
   else if (t.id === "fh1") { F.h1 = t.checked; renderContent(); }
   else if (t.id === "fh2") { F.h2 = t.checked; renderContent(); }
@@ -1650,6 +1692,7 @@ app.addEventListener("submit", async e => {
   e.preventDefault();
   const name = $("#qa-n").value.trim(); if (!name) return;
   const np = mk([name, $("#qa-c").value, $("#qa-s").value, $("#qa-d").value, "", ""]);
+  if ($("#qa-sh").value) np.shoots = [{ date: $("#qa-sh").value, time: "", memo: "" }];
   const b = $("#qa-b").value; if (b !== "") np.contract = Math.round(Number(b) * 10000);
   projects.push(np); renderContent();
   e.target.reset(); if (document.activeElement) document.activeElement.blur(); window.scrollTo({ top: 0 });
@@ -1672,6 +1715,7 @@ app.addEventListener("click", async e => {
       alert("로그인 실패: " + (c || (err && err.message) || err) + hint);
     });
   }
+  else if (act === "heroFull") { heroFull = !heroFull; try { localStorage.setItem("bowl_hero_full", heroFull ? "1" : "0"); } catch (err) {} if (!heroFull && F.open === "ar") F.open = ""; renderStats(); }
   else if (act === "hk") { F.open = F.open === b.dataset.k ? "" : b.dataset.k; renderStats(); }
   else if (act === "logout") { flush(); if (confirm("로그아웃할까요?")) store.signOut(); }
   else if (act === "back") { flush(); location.hash = lastView || "#/"; }
@@ -1718,6 +1762,8 @@ app.addEventListener("click", async e => {
     const ta = $("#notes"); ta.value += (ta.value && !ta.value.endsWith("\n") ? "\n\n" : "") + `## ${todayStr()}\n`;
     p.notes = ta.value; persist(p); ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length);
   }
+  else if (act === "addShoot") { p.shoots ||= []; const last = p.shoots[p.shoots.length - 1]; let d0 = todayStr(); if (last && last.date) { const x = pd(last.date); x.setDate(x.getDate() + 1); d0 = ymd(x); } p.shoots.push({ date: d0, time: "", memo: "" }); persist(p); renderShoots(p); }
+  else if (act === "delShoot") { p.shoots.splice(+b.dataset.i, 1); persist(p); renderShoots(p); }
   else if (act === "addExp") {
     const x = { id: uid(), date: todayStr(), item: "", cat: "기타", amount: 0, vat: "inc", projectId: p.id, createdAt: Date.now() };
     expenses.push(x); renderExp(p); updateBudget(p);
