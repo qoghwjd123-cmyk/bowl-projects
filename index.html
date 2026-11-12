@@ -386,16 +386,26 @@ input[type=date]::-webkit-inner-spin-button{display:none}
 .cal .ce{font-family:var(--num);font-size:11.5px;color:var(--brand);opacity:.55;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .calsum .cel{font-size:12px;opacity:.8}
 
+@media (max-width:1100px) and (min-width:761px){
+  .qa-ex{grid-template-columns:9rem minmax(0,1fr) 8rem 7rem}
+  .qa-ex .wide{grid-column:span 2}
+  .qa-lg{grid-template-columns:8rem 8.5rem 8rem minmax(0,1fr)}
+  .qa-lg .wide{grid-column:span 2}
+  .xr{grid-template-columns:3.6rem minmax(0,1.4fr) 5.6rem minmax(0,1fr) 4.2rem 6.8rem 6.8rem;column-gap:10px;padding:0 14px;font-size:13.5px}
+  .xedit{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
 /* 가계부 달력 */
 .calw{margin-top:22px}
 .cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
 .cal .wd{font-size:12px;color:var(--mu);text-align:center;padding:4px 0}
-.cal .wd.sun{color:var(--coral)}
+.cal .wd.sun{color:#e03131}.cal .wd.sat{color:#1c7ed6}
 .cal .dc{background:var(--bg);border-radius:10px;min-height:76px;padding:6px 7px;display:flex;flex-direction:column;gap:2px;min-width:0}
 .cal .dc.out{opacity:.35}
 .cal .dc.today{box-shadow:inset 0 0 0 2px var(--brand)}
 .cal .dn{font-size:12.5px;font-weight:700;color:var(--ink)}
-.cal .dc.sun .dn{color:var(--coral)}
+.cal .dc.sun{background:#fbecec}.cal .dc.sat{background:#e9f0fb}
+.cal .dc.sun .dn{color:#e03131}.cal .dc.sat .dn{color:#1c7ed6}
 .cal .ci,.cal .co{font-family:var(--num);font-variant-numeric:tabular-nums;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cal .ci{color:var(--brand)}.cal .co{color:var(--coral)}
 .calsum{display:flex;gap:16px;font-size:13px;color:var(--mu)}
@@ -569,8 +579,13 @@ h4{margin:18px 0 8px;font-size:14px;font-weight:600}
   .grid4{grid-template-columns:1fr 1fr}
   .lrow{grid-template-columns:1fr 38px 38px}
   .lrow input:first-child{grid-column:1/-1}
-  .erow{grid-template-columns:1fr 1fr 38px;padding-bottom:8px;border-bottom:1px dashed var(--line);margin-bottom:8px}
-  .erow .eit{grid-column:1/-1;order:-1}
+  .erow input,.erow select{min-width:0;width:100%}
+  .erow{grid-template-columns:minmax(0,1.35fr) minmax(0,.75fr) minmax(0,.7fr) 38px;padding-bottom:8px;border-bottom:1px dashed var(--line);margin-bottom:8px}
+  .erow .eit{grid-column:1/4;grid-row:1}
+  .erow .x{grid-column:4;grid-row:1}
+  .erow input[type=date]{grid-column:1;grid-row:2}
+  .erow input[type=number]{grid-column:2;grid-row:2}
+  .erow select{grid-column:3/5;grid-row:2}
   .grid3{grid-template-columns:1fr 1fr}
   .sum b{font-size:14px}
   .sum div{padding:10px}
@@ -692,7 +707,8 @@ async function firebaseStore() {
   const auth = Au.getAuth(app);
   const db = Fs.initializeFirestore(app, { localCache: Fs.persistentLocalCache() });
   const unsubs = {};
-  const permHint = err => { if (err && err.code === "permission-denied") alert("지출·가계부를 저장하려면 Firebase 보안 규칙을 새 규칙으로 바꿔주세요."); };
+  let hinted = false;
+  const permHint = err => { if (!hinted && err && err.code === "permission-denied") { hinted = true; alert("지출·가계부를 쓰려면 Firebase 보안 규칙을 새 규칙으로 바꿔주세요. (Firestore → 규칙)"); } };
   return {
     mode: "firebase",
     onAuth(f) {
@@ -845,7 +861,7 @@ function periodOf(mode, anchor) {
   const d = pd(anchor), y = d.getFullYear(), m = d.getMonth();
   if (mode === "year") return { from: `${y}-01-01`, to: `${y}-12-31`, label: `${y}년` };
   if (mode === "month") return { from: ymd(new Date(y, m, 1)), to: ymd(new Date(y, m + 1, 0)), label: `${y}년 ${m + 1}월` };
-  const st = new Date(y, m, d.getDate() - ((d.getDay() + 6) % 7)), en = new Date(st.getFullYear(), st.getMonth(), st.getDate() + 6);
+  const st = new Date(y, m, d.getDate() - d.getDay()), en = new Date(st.getFullYear(), st.getMonth(), st.getDate() + 6);
   const lb = st.getMonth() === en.getMonth() ? `${st.getMonth() + 1}월 ${st.getDate()}일 – ${en.getDate()}일` : `${st.getMonth() + 1}월 ${st.getDate()}일 – ${en.getMonth() + 1}월 ${en.getDate()}일`;
   return { from: ymd(st), to: ymd(en), label: lb };
 }
@@ -953,15 +969,15 @@ function calHTML(r, c, st) {
   if (st.incBiz) c.bizList.forEach(e => add(out, e.date, expTot(e)));
   const exp2 = {}; projects.filter(p => p.payDue && unpaid(p) > 0 && Number(p.contract) > 0 && inR(p.payDue, { from: "0000", to: "9999" })).forEach(p => add(exp2, p.payDue, unpaid(p)));
   const f = pd(r.from), t = pd(r.to);
-  const start = new Date(f.getFullYear(), f.getMonth(), f.getDate() - ((f.getDay() + 6) % 7));
-  const end = new Date(t.getFullYear(), t.getMonth(), t.getDate() + (6 - (t.getDay() + 6) % 7));
+  const start = new Date(f.getFullYear(), f.getMonth(), f.getDate() - f.getDay());
+  const end = new Date(t.getFullYear(), t.getMonth(), t.getDate() + (6 - t.getDay()));
   const today = todayStr(); let cells = "";
   for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    const k2 = ymd(d), sun = d.getDay() === 0;
-    cells += `<div class="dc ${inR(k2, r) ? "" : "out"} ${k2 === today ? "today" : ""} ${sun ? "sun" : ""}"><span class="dn">${d.getDate()}</span>${inc[k2] ? `<span class="ci">+${man(inc[k2])}</span>` : ""}${out[k2] ? `<span class="co">−${man(out[k2])}</span>` : ""}${exp2[k2] ? `<span class="ce"><i>예정 </i>+${man(exp2[k2])}</span>` : ""}</div>`;
+    const k2 = ymd(d), sun = d.getDay() === 0, sat = d.getDay() === 6;
+    cells += `<div class="dc ${inR(k2, r) ? "" : "out"} ${k2 === today ? "today" : ""} ${sun ? "sun" : sat ? "sat" : ""}"><span class="dn">${d.getDate()}</span>${inc[k2] ? `<span class="ci">+${man(inc[k2])}</span>` : ""}${out[k2] ? `<span class="co">−${man(out[k2])}</span>` : ""}${exp2[k2] ? `<span class="ce"><i>예정 </i>+${man(exp2[k2])}</span>` : ""}</div>`;
   }
   return `<div class="card calw"><h3>달력 <span class="calsum"><span style="color:var(--brand)">수입 <b>${won(c.INC)}</b></span><span style="color:var(--coral)">지출 <b>${won(c.OUT)}</b></span><span class="cel">흐린 글씨는 입금 예정</span></span></h3>
-    <div class="cal">${["월", "화", "수", "목", "금", "토", "일"].map((w, i) => `<span class="wd ${i === 6 ? "sun" : ""}">${w}</span>`).join("")}${cells}</div></div>`;
+    <div class="cal">${["일", "월", "화", "수", "목", "금", "토"].map((w, i) => `<span class="wd ${i === 0 ? "sun" : i === 6 ? "sat" : ""}">${w}</span>`).join("")}${cells}</div></div>`;
 }
 function lgHTML() {
   const st = lgSet(), r = periodOf(LG.mode, LG.anchor), c = lgCompute(r, st);
@@ -1450,7 +1466,7 @@ app.addEventListener("drop", e => {
 });
 app.addEventListener("dragend", () => { dragId = null; document.querySelectorAll(".col.over").forEach(x => x.classList.remove("over")); });
 
-addEventListener("hashchange", () => { flush(); render(); });
+addEventListener("hashchange", () => { flush(); viewDirty = false; render(); });
 
 /* ================= 시작 ================= */
 function onData(list) {
@@ -1475,6 +1491,7 @@ function onLedger(list) {
 }
 let viewDirty = false;
 function refreshView() {
+  if (!user || routeId()) { viewDirty = false; return; }
   const a = document.activeElement;
   if (a && $("#mv") && $("#mv").contains(a) && /INPUT|SELECT|TEXTAREA/.test(a.tagName)) { viewDirty = true; return; }
   viewDirty = false;
@@ -1483,8 +1500,9 @@ function refreshView() {
 }
 app.addEventListener("focusout", () => setTimeout(() => { if (viewDirty && !(document.activeElement && /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName))) refreshView(); }, 0));
 const guessCat = n => { n = n || ""; const hit = EXP_CATS.find(c => n.includes(c)); if (hit) return hit; if (/인건|외주|스태프/.test(n)) return "외주비"; if (/렌탈|대여/.test(n)) return "장비 렌탈"; if (/라이선스|구독|폰트|음악/.test(n)) return "구독·소프트웨어"; if (/식|밥|커피/.test(n)) return "식비"; if (/출장|교통|주유|숙박|항공|KTX/.test(n)) return "출장비"; return "기타"; };
+let migrateFailed = false;
 function migrate() {
-  if (!gotExp || migrating) return;
+  if (!gotExp || migrating || migrateFailed) return;
   const todo = projects.filter(p => (p.expenses || []).length);
   if (!todo.length) return;
   migrating = true;
@@ -1497,7 +1515,7 @@ function migrate() {
     });
     ops.push(["projects", { ...p, expenses: [], updatedAt: Date.now() }]);
   });
-  store.batch(ops).then(() => { migrating = false; }).catch(err => { migrating = false; console.warn("migrate", err); });
+  store.batch(ops).then(() => { migrating = false; }).catch(err => { migrating = false; migrateFailed = true; console.warn("migrate", err); });
 }
 
 (async () => {
