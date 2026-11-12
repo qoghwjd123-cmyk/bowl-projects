@@ -623,7 +623,27 @@ label.f input,label.f textarea{margin-top:5px;color:var(--ink);font-size:15px}
 .sum b{font-family:var(--num);font-variant-numeric:tabular-nums;font-size:16px}
 h4{margin:18px 0 8px;font-size:14px;font-weight:600}
 .ps+.ps{margin-top:28px;padding-top:24px;border-top:1px solid var(--line)}
-.sh{margin:0 0 14px;font-size:17px;font-weight:700;letter-spacing:-.01em}
+.sh{margin:0 0 14px;font-size:17px;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+.sh::before{content:"";width:4px;height:17px;border-radius:2px;background:var(--brand)}
+.sh.sh-i::before{background:var(--sun)}
+.sum .sx.has{background:#ffeccc}.sum .sx.has b{color:#a85a00}
+.sum .sm3{background:#d7f2ec}.sum .sm3 b{color:#0b7a6c}
+.sum .sm3.neg{background:#fde4df}.sum .sm3.neg b{color:#c2412d}
+.sum .su.due{background:#fde4df}.sum .su.due b{color:#c2412d}
+.sum .su.paid{background:#d7f2ec}.sum .su.paid b{color:#0b7a6c}
+.gd::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#2f9e44;margin-right:6px;vertical-align:1px}
+.dbox{background:var(--bg);border-radius:12px;padding:12px 14px 14px;margin-top:4px}
+.dbox input{min-width:0;width:100%}
+@media (max-width:760px){.grid4.dbox{grid-template-columns:repeat(2,minmax(0,1fr));padding:10px 10px 12px}}
+.tgrow{display:flex;flex-wrap:wrap;gap:14px 28px;margin-bottom:14px}
+.tgf{display:flex;flex-direction:column;gap:6px}
+.tgl{font-size:13px;color:var(--mu)}
+.tg{display:inline-flex;flex-wrap:wrap;gap:6px}
+.tgb{height:38px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:var(--panel);font-size:14px;font-weight:600;color:var(--mu);cursor:pointer}
+.tgb:hover{border-color:#aab2bc}
+.tgb.on{color:#fff;border-color:transparent}
+.tgb.st0.on{background:#f5b800;color:#1b1f24}.tgb.st1.on{background:#12a594}
+.tgb.c0.on{background:#3552d1}.tgb.c1.on{background:#e8590c}.tgb.c2.on{background:#12a594}.tgb.cn.on{background:#868e96}
 .erow{display:grid;grid-template-columns:9.5rem minmax(0,1fr) 7.5rem 7.5rem 38px;gap:6px;margin-bottom:6px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .exnote{font-size:12.5px;color:var(--mu);margin:2px 0 10px}
@@ -1163,16 +1183,20 @@ const PL = { anchor: todayStr(), sel: null, calM: todayStr().slice(0, 7), ev: nu
 function plEvents() {
   const list = schedule.map(e => ({ ...e, auto: false }));
   projects.forEach(p => {
+    const ty = catOf(p) === "촬영" ? "shoot" : "bowl";
+    if (p.start) list.push({ id: "st_" + p.id, auto: "start", type: ty, date: p.start, time: "", title: p.name, projectId: p.id });
+    if (p.end && p.end !== p.start) list.push({ id: "en_" + p.id, auto: "end", type: ty, date: p.end, time: "", title: p.name, projectId: p.id });
     if (p.due && p.status !== "완료") list.push({ id: "due_" + p.id, auto: "due", type: "bowl", date: p.due, time: "", title: `${p.name} 납기`, projectId: p.id });
     if (p.payDue && Number(p.contract) > 0 && unpaid(p) > 0) list.push({ id: "pay_" + p.id, auto: "pay", type: "bowl", date: p.payDue, time: "", title: `${p.name} 입금 예정 ${man(unpaid(p))}`, projectId: p.id });
   });
   return list;
 }
+const fmtTime = v => { v = String(v || "").replace(/[^0-9:]/g, ""); if (!v) return ""; let h, m; if (v.includes(":")) { [h, m] = v.split(":"); } else if (v.length <= 2) { h = v; m = "0"; } else { h = v.slice(0, v.length - 2); m = v.slice(-2); } h = Math.min(23, +h || 0); m = Math.min(59, +m || 0); return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`; };
 const evSort = (a, b) => (a.time ? 0 : 1) - (b.time ? 0 : 1) || (a.time || "").localeCompare(b.time || "") || (a.auto ? 1 : 0) - (b.auto ? 1 : 0);
 function evCard(e) {
   const t = PTYPE[e.type] || PTYPE.bowl;
   const pj = e.projectId && projName(e.projectId);
-  const lab = e.auto === "due" ? "납기" : e.auto === "pay" ? "입금 예정" : e.time || "종일";
+  const lab = e.auto === "due" ? "납기" : e.auto === "pay" ? "입금 예정" : e.auto === "start" ? "시작" : e.auto === "end" ? "마감" : e.time || "종일";
   const open = PL.ev === e.id && !e.auto;
   const title = e.auto ? esc(e.title.replace(` 납기`, "").replace(/ 입금 예정 .*/, "")) : esc(e.title) || "(내용 없음)";
   const sub = e.auto === "pay" ? esc(e.title.match(/입금 예정 (.*)$/)?.[1] || "") : (pj && !e.auto ? esc(pj) : "");
@@ -1181,7 +1205,7 @@ function evCard(e) {
       <span class="tm"><span>${lab}</span><em>${t.l}</em></span><b>${title}</b>${sub ? `<small>${sub}</small>` : ""}</button>
     ${open ? `<div class="eved">
       <input type="date" data-se="date" data-id="${e.id}" value="${esc(e.date)}" aria-label="날짜">
-      <input type="time" data-se="time" data-id="${e.id}" value="${esc(e.time || "")}" aria-label="시간">
+      <input data-se="time" data-id="${e.id}" value="${esc(e.time || "")}" inputmode="numeric" placeholder="시간 (예: 1430)" maxlength="5" aria-label="시간">
       <select data-se="type" data-id="${e.id}" aria-label="종류">${Object.entries(PTYPE).map(([k, v]) => `<option value="${k}" ${e.type === k ? "selected" : ""}>${v.l}</option>`).join("")}</select>
       <input data-se="title" data-id="${e.id}" value="${esc(e.title)}" placeholder="내용" aria-label="내용">
       <select data-se="projectId" data-id="${e.id}" aria-label="프로젝트"><option value="">프로젝트 없음</option>${projects.filter(p => p.status !== "완료" || p.id === e.projectId).map(p => `<option value="${p.id}" ${e.projectId === p.id ? "selected" : ""}>${esc(p.name)}</option>`).join("")}</select>
@@ -1224,10 +1248,10 @@ function plHTML() {
   return `
   <div class="pl-h"><h2>${thisWeek ? "이번 주" : `${st.getMonth() + 1}월 ${wkNo}주차`}<small>${r.label}</small></h2>
     <div class="ctl"><button type="button" class="today-btn" data-act="plToday">오늘</button><div class="pnav"><button type="button" data-act="plNav" data-v="-1" aria-label="이전 주">‹</button><b>${st.getMonth() + 1}월 ${wkNo}주차</b><button type="button" data-act="plNav" data-v="1" aria-label="다음 주">›</button></div></div></div>
-  <div class="lgd"><span><i style="background:var(--t-shoot)"></i>촬영</span><span><i style="background:var(--t-bowl)"></i>보울</span><span>점선 = 프로젝트에서 자동 (납기 · 입금 예정일)</span></div>
+  <div class="lgd"><span><i style="background:var(--t-shoot)"></i>촬영</span><span><i style="background:var(--t-bowl)"></i>보울</span><span>점선 = 프로젝트에서 자동 (시작 · 마감 · 납기 · 입금 예정일)</span></div>
   <form class="qa3" id="plf" autocomplete="off"><b>일정 추가</b>
     <input type="date" name="date" value="${PL.formDate || (thisWeek ? today : r.from)}" required aria-label="날짜">
-    <input type="time" name="time" aria-label="시간 (선택)">
+    <input name="time" inputmode="numeric" placeholder="시간 (예: 930)" maxlength="5" aria-label="시간 (비우면 종일)">
     ${segH("plType", PL.type, Object.entries(PTYPE).map(([k, v]) => [k, v.l]))}
     <input class="wide" name="title" placeholder="${PL.type === "shoot" ? "예: 인터뷰 촬영" : "예: 1차 편집 공유"}" required aria-label="내용">
     <select class="wide" name="projectId" aria-label="프로젝트"><option value="">프로젝트 (선택)</option>${projects.filter(p => p.status !== "완료").map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join("")}</select>
@@ -1484,22 +1508,22 @@ function renderPane(p) {
     <textarea class="notes" id="notes" data-f="notes" placeholder="미팅 기록, 콘티 아이디어, 클라이언트 피드백">${esc(p.notes)}</textarea>`;
   } else {
     el.innerHTML = `
-    <section class="ps"><h3 class="sh">버짓</h3>
+    <section class="ps"><h3 class="sh sh-b">버짓</h3>
       <div class="grid4">
         <label class="f">계약금액(만원)<input type="number" step="any" inputmode="decimal" placeholder="예: 275.3 → 275만 3천원" data-f="contract" value="${k(p.contract)}"></label>
         <label class="f">입금액(만원)<input type="number" step="any" inputmode="decimal" placeholder="예: 275.3 → 275만 3천원" data-f="received" value="${k(p.received)}"></label>
-        <label class="f">입금일<input type="date" data-f="paidDate" value="${esc(p.paidDate || "")}"></label>
-        <label class="f">입금 예정일<input type="date" data-f="payDue" value="${esc(p.payDue || "")}"></label></div>
-      <div class="sum"><div><small>지출 합계</small><b id="b-exp"></b></div><div><small>마진</small><b id="b-margin"></b></div><div><small>미수금</small><b id="b-unpaid"></b></div></div>
+        <label class="f"><span class="gd">입금일</span><input type="date" data-f="paidDate" value="${esc(p.paidDate || "")}"></label>
+        <label class="f"><span class="gd">입금 예정일</span><input type="date" data-f="payDue" value="${esc(p.payDue || "")}"></label></div>
+      <div class="sum"><div class="sx"><small>지출 합계</small><b id="b-exp"></b></div><div class="sm3"><small>마진</small><b id="b-margin"></b></div><div class="su" id="b-ubox"><small id="b-ulab">미수금</small><b id="b-unpaid"></b></div></div>
       <h4>지출 항목</h4>
       <p class="exnote">지출 탭과 연결돼 있어요. 금액은 만원 단위, 마진은 부가세를 뺀 공급가액으로 계산해요. <a href="#/expenses">지출 탭 보기</a></p>
       <div id="exp"></div>
       <button class="ghost" data-act="addExp">+ 지출 추가</button></section>
-    <section class="ps"><h3 class="sh">정보·링크</h3>
-      <div class="grid2" style="margin-bottom:12px">
-        <label class="f">상태<select data-f="status">${STATUSES.map(s => `<option ${p.status === s ? "selected" : ""}>${s}</option>`).join("")}</select></label>
-        <label class="f">카테고리<select data-f="category"><option value="">없음</option>${CATS.map(c => `<option ${catOf(p) === c ? "selected" : ""}>${c}</option>`).join("")}</select></label></div>
-      <div class="grid4">
+    <section class="ps"><h3 class="sh sh-i">정보·링크</h3>
+      <div class="tgrow">
+        <div class="tgf"><span class="tgl">상태</span><div class="tg" role="group" aria-label="상태">${STATUSES.map(s => `<button type="button" class="tgb st${STATUSES.indexOf(s)} ${p.status === s ? "on" : ""}" data-act="setF" data-f="status" data-v="${s}" aria-pressed="${p.status === s}">${s}</button>`).join("")}</div></div>
+        <div class="tgf"><span class="tgl">카테고리</span><div class="tg" role="group" aria-label="카테고리"><button type="button" class="tgb cn ${!catOf(p) ? "on" : ""}" data-act="setF" data-f="category" data-v="" aria-pressed="${!catOf(p)}">없음</button>${CATS.map((c, i) => `<button type="button" class="tgb c${i} ${catOf(p) === c ? "on" : ""}" data-act="setF" data-f="category" data-v="${c}" aria-pressed="${catOf(p) === c}">${c}</button>`).join("")}</div></div></div>
+      <div class="grid4 dbox">
         <label class="f">등록일<input type="date" data-f="registered" value="${esc(regOf(p))}"></label>
         <label class="f">시작일<input type="date" data-f="start" value="${esc(p.start)}"></label>
         <label class="f">마감일<input type="date" data-f="end" value="${esc(p.end)}"></label>
@@ -1534,9 +1558,11 @@ function renderLinks(p) {
 function updateBudget(p) {
   const e = $("#b-exp"); if (!e) return;
   const has = Number(p.contract) > 0;
-  e.textContent = won(sumExp(p));
+  e.textContent = won(sumExp(p)); e.parentElement.classList.toggle("has", sumExp(p) > 0);
   $("#b-margin").textContent = has ? `${won(margin(p))} (${Math.round(margin(p) / p.contract * 100)}%)` : "-";
   $("#b-unpaid").textContent = has ? won(unpaid(p)) : "-";
+  const ub = $("#b-ubox"); if (ub) { const paid = has && unpaid(p) === 0; ub.classList.toggle("paid", paid); ub.classList.toggle("due", has && !paid); $("#b-ulab").textContent = paid ? "미수금 · 정산완료" : "미수금"; }
+  const mb = $("#b-margin"); if (mb) mb.parentElement.classList.toggle("neg", has && margin(p) < 0);
 }
 
 /* ================= 이벤트 ================= */
@@ -1545,7 +1571,7 @@ app.addEventListener("input", e => {
   if (t.id === "q") { F.q = t.value; renderContent(); return; }
   if (t.dataset.se) {
     const x = schedule.find(y => y.id === t.dataset.id); if (!x) return;
-    x[t.dataset.se] = t.value; persistSch(x); return;
+    x[t.dataset.se] = t.dataset.se === "time" ? fmtTime(t.value) : t.value; persistSch(x); return;
   }
   if (t.dataset.xe) {
     const x = expenses.find(y => y.id === t.dataset.id); if (!x) return;
@@ -1571,7 +1597,8 @@ app.addEventListener("change", e => {
   if (t.id === "fcat") { F.cat = t.value; renderContent(); }
   else if (t.id === "excat") { EX.cat = t.value; renderMain(); }
   else if (t.dataset.xe && isExp()) { flushExp(); viewDirty = true; }
-  else if (t.dataset.se && /date|time|type/.test(t.dataset.se)) { if (t.dataset.se === "date") { PL.anchor = t.value || PL.anchor; PL.calM = PL.anchor.slice(0, 7); } viewDirty = true; }
+  else if (t.name === "time" && t.form && t.form.id === "plf") { t.value = fmtTime(t.value); }
+  else if (t.dataset.se && /date|time|type/.test(t.dataset.se)) { if (t.dataset.se === "time") t.value = fmtTime(t.value); if (t.dataset.se === "date") { PL.anchor = t.value || PL.anchor; PL.calM = PL.anchor.slice(0, 7); } viewDirty = true; }
   else if (t.id === "fh1") { F.h1 = t.checked; renderContent(); }
   else if (t.id === "fh2") { F.h2 = t.checked; renderContent(); }
   else if (t.id === "fdone") { F.hideDone = t.checked; renderContent(); }
@@ -1581,7 +1608,7 @@ app.addEventListener("change", e => {
 app.addEventListener("submit", async e => {
   if (e.target.id === "plf") {
     e.preventDefault(); const f = e.target;
-    const x = { id: uid(), date: f.date.value || todayStr(), time: f.time.value || "", type: PL.type, title: f.title.value.trim(), projectId: f.projectId.value, createdAt: Date.now() };
+    const x = { id: uid(), date: f.date.value || todayStr(), time: fmtTime(f.time.value), type: PL.type, title: f.title.value.trim(), projectId: f.projectId.value, createdAt: Date.now() };
     if (!x.title) return;
     schedule.push(x); PL.formDate = x.date;
     if (!inR(x.date, periodOf("week", PL.anchor))) { PL.anchor = x.date; PL.calM = x.date.slice(0, 7); }
@@ -1653,6 +1680,7 @@ app.addEventListener("click", async e => {
     const n = $("#qa-n"); if (n) { n.scrollIntoView({ block: "center" }); n.focus(); }
   }
   else if (act === "seed") { await store.batch(SEED.map(mk).map(p => ["projects", p])); }
+  else if (act === "setF") { if (!p) return; p[b.dataset.f] = b.dataset.v; persist(p); b.parentElement.querySelectorAll(".tgb").forEach(x => { const on = x === b; x.classList.toggle("on", on); x.setAttribute("aria-pressed", on); }); }
   else if (act === "tab") { detailTab = b.dataset.t; if (p) renderPane(p); }
   else if (act === "plNav") { PL.anchor = shiftAnchor("week", PL.anchor, +b.dataset.v); PL.calM = PL.anchor.slice(0, 7); PL.ev = null; renderMain(); }
   else if (act === "plToday") { PL.anchor = todayStr(); PL.calM = PL.anchor.slice(0, 7); PL.sel = null; PL.ev = null; renderMain(); }
