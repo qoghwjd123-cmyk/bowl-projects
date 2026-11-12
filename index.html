@@ -506,6 +506,7 @@ input[type=date]::-webkit-inner-spin-button{display:none}
 @media (max-width:1100px) and (min-width:761px){.qa{grid-template-columns:minmax(0,1fr) 7rem 7rem 9.5rem}.qa .nm{grid-column:1/-1}}
 
 .plhl{margin-top:30px}
+.plqa .qa{margin-bottom:12px}
 
 /* 파란 박스 접기 */
 .hmore{display:flex;justify-content:flex-end;margin-top:10px}
@@ -934,6 +935,16 @@ function render() {
   renderMain();
 }
 
+const qaHTML = () => `<form class="qa" id="qa" autocomplete="off">
+    <h3 class="qa-t">새 프로젝트 추가</h3>
+    <label class="nm">프로젝트명<input id="qa-n" required placeholder="프로젝트명"></label>
+    <label>카테고리<select id="qa-c"><option value="">없음</option>${CATS.map(c => `<option>${c}</option>`).join("")}</select></label>
+    <label>상태<select id="qa-s">${STATUSES.map(x => `<option>${x}</option>`).join("")}</select></label>
+    <label>시작일<input id="qa-d" type="date"></label>
+    <label>촬영일<input id="qa-sh" type="date"></label>
+    <label title="275.3 입력 → 275만 3천원">버짓(만원)<input id="qa-b" type="number" step="any" inputmode="decimal" placeholder="예: 275.3"></label>
+    <button class="btn" type="submit">+ 추가</button>
+  </form>`;
 const isMonthly = () => location.hash === "#/monthly";
 const isTax = () => location.hash === "#/tax";
 function taxHTML() {
@@ -1279,12 +1290,13 @@ function plHTML() {
   <div class="pl-h"><h2>${thisWeek ? "이번 주" : `${st.getMonth() + 1}월 ${wkNo}주차`}<small>${r.label}</small></h2>
     <div class="ctl"><button type="button" class="today-btn" data-act="plToday">오늘</button><div class="pnav"><button type="button" data-act="plNav" data-v="-1" aria-label="이전 주">‹</button><b>${st.getMonth() + 1}월 ${wkNo}주차</b><button type="button" data-act="plNav" data-v="1" aria-label="다음 주">›</button></div></div></div>
   <div class="lgd"><span><i style="background:var(--t-shoot)"></i>촬영</span><span><i style="background:var(--t-bowl)"></i>보울</span><span>점선 = 프로젝트에서 자동 (촬영일 · 편집 납기 · 입금 예정일)</span></div>
+  <div class="plqa">${qaHTML()}</div>
   <form class="qa3" id="plf" autocomplete="off"><b>일정 추가</b>
     <input type="date" name="date" value="${PL.formDate || (thisWeek ? today : r.from)}" required aria-label="날짜">
     <input name="time" inputmode="numeric" placeholder="시간 (예: 930)" maxlength="5" aria-label="시간 (비우면 종일)">
     ${segH("plType", PL.type, Object.entries(PTYPE).map(([k, v]) => [k, v.l]))}
     <input class="wide" name="title" placeholder="${PL.type === "shoot" ? "예: 인터뷰 촬영" : "예: 1차 편집 공유"}" required aria-label="내용">
-    <select class="wide" name="projectId" aria-label="프로젝트"><option value="">프로젝트 (선택)</option>${projects.filter(p => p.status !== "완료").map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join("")}</select>
+    <select class="wide" name="projectId" aria-label="프로젝트"><option value="">프로젝트 (선택)</option>${projects.filter(p => p.status !== "완료").map(p => `<option value="${p.id}" ${PL.newPid === p.id ? "selected" : ""}>${esc(p.name)}</option>`).join("")}</select>
     <button class="btn" type="submit">+ 추가</button></form>
   <div class="wk">${wk}</div>
   <div class="pgrid">
@@ -1333,16 +1345,7 @@ function renderMain() {
   <nav class="vtabs"><a href="#/" class="${pl ? "on" : ""}">플래너</a><a href="#/dash" class="${isDash() ? "on" : ""}">대시보드</a><a href="#/monthly" class="${mv ? "on" : ""}">월별보기</a><a href="#/expenses" class="${ex ? "on" : ""}">지출</a><a href="#/ledger" class="${lg ? "on" : ""}">가계부</a><a href="#/tax" class="${tx ? "on" : ""}">세금</a></nav>
   ${pl ? `<div id="mv">${plHTML()}</div>` : mv ? `<div id="mv">${monthlyHTML()}</div>` : tx ? `<div id="mv">${taxHTML()}</div>` : ex ? `<div id="mv">${exHTML()}</div>` : lg ? `<div id="mv">${lgHTML()}</div>` : `
   <div id="stats"></div>
-  <form class="qa" id="qa" autocomplete="off">
-    <h3 class="qa-t">새 프로젝트 추가</h3>
-    <label class="nm">프로젝트명<input id="qa-n" required placeholder="프로젝트명"></label>
-    <label>카테고리<select id="qa-c"><option value="">없음</option>${CATS.map(c => `<option>${c}</option>`).join("")}</select></label>
-    <label>상태<select id="qa-s">${STATUSES.map(x => `<option>${x}</option>`).join("")}</select></label>
-    <label>시작일<input id="qa-d" type="date"></label>
-    <label>촬영일<input id="qa-sh" type="date"></label>
-    <label title="275.3 입력 → 275만 3천원">버짓(만원)<input id="qa-b" type="number" step="any" inputmode="decimal" placeholder="예: 275.3"></label>
-    <button class="btn" type="submit">+ 추가</button>
-  </form>
+  ${qaHTML()}
   <section class="allp">
     <div class="sec-h"><h3>전체 프로젝트</h3>
       <nav class="tabs"><a href="#/dash" class="${board ? "" : "on"}">목록</a><a href="#/board" class="${board ? "on" : ""}">보드</a></nav></div>
@@ -1699,8 +1702,11 @@ app.addEventListener("submit", async e => {
   const np = mk([name, $("#qa-c").value, $("#qa-s").value, $("#qa-d").value, "", ""]);
   if ($("#qa-sh").value) np.shoots = [{ date: $("#qa-sh").value, time: "", memo: "" }];
   const b = $("#qa-b").value; if (b !== "") np.contract = Math.round(Number(b) * 10000);
-  projects.push(np); renderContent();
-  e.target.reset(); if (document.activeElement) document.activeElement.blur(); window.scrollTo({ top: 0 });
+  projects.push(np);
+  if (isPlanner()) {
+    PL.newPid = np.id; if (document.activeElement) document.activeElement.blur(); renderMain();
+    const pf = $("#plf"); if (pf) { pf.projectId.value = np.id; pf.title.focus(); }
+  } else { renderContent(); e.target.reset(); if (document.activeElement) document.activeElement.blur(); window.scrollTo({ top: 0 }); }
   try { await store.save("projects", np); } catch (err) { alert("저장 실패: " + (err.code || err.message)); }
 });
 app.addEventListener("click", e => {
@@ -1725,7 +1731,7 @@ app.addEventListener("click", async e => {
   else if (act === "logout") { flush(); if (confirm("로그아웃할까요?")) store.signOut(); }
   else if (act === "back") { flush(); location.hash = lastView || "#/"; }
   else if (act === "new") {
-    if (!isDash()) { location.hash = "#/dash"; await new Promise(r => setTimeout(r, 60)); }
+    if (!isDash() && !isPlanner()) { location.hash = "#/dash"; await new Promise(r => setTimeout(r, 60)); }
     const n = $("#qa-n"); if (n) { n.scrollIntoView({ block: "center" }); n.focus(); }
   }
   else if (act === "seed") { await store.batch(SEED.map(mk).map(p => ["projects", p])); }
