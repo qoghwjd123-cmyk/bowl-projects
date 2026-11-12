@@ -195,7 +195,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .tx-sub b{font-family:var(--num);font-size:15px;white-space:nowrap}
 .tx-sec{margin:0 0 26px}
 .tx-sec h3{margin:0 0 12px;font-size:17px}
-.tx-r{display:grid;grid-template-columns:4rem repeat(3,minmax(0,1fr)) 3.5rem;column-gap:14px;align-items:center;padding:0 20px;min-height:48px;border-top:1px solid var(--line);list-style:none;cursor:pointer}
+.tx-r{display:grid;grid-template-columns:4rem repeat(2,minmax(0,1fr)) 3.5rem;column-gap:14px;align-items:center;padding:0 20px;min-height:48px;border-top:1px solid var(--line);list-style:none;cursor:pointer}
 .tx-h{height:40px;background:var(--soft);font-size:12.5px;color:var(--mu);cursor:default;border-top:0}
 .tx-r.tx-h span:nth-child(n+2),.tx-r .num{text-align:right}
 .tx-r .mo{font-weight:700}
@@ -215,8 +215,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 @media (max-width:760px){
   .tx-cards{grid-template-columns:1fr;gap:10px}
   .tx-r{grid-template-columns:3rem minmax(0,1fr) minmax(0,1fr);padding:0 16px;column-gap:10px}
-  .tx-r .tot,.tx-r .cnt{display:none}
-  .tx-h span:nth-child(4),.tx-h span:nth-child(5){display:none}
+  .tx-r .cnt{display:none}
+  .tx-h span:nth-child(4){display:none}
   .tx-d{padding:4px 16px 8px}
   .tx-d a{font-size:13.5px;gap:10px}
   .tx-d .amt{flex-direction:column;gap:0;align-items:flex-end}
@@ -365,6 +365,49 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
   .xedit{grid-template-columns:1fr 1fr;padding:12px 16px}
   .xedit .wide{grid-column:1/-1}
   .hctl .leg2{display:none}
+}
+
+.bzl{margin:-2px 0 8px 30px;padding:2px 0 6px}
+.bzl div{display:grid;grid-template-columns:2.8rem minmax(0,1fr) auto;gap:8px;font-size:12.5px;color:var(--mu);padding:3px 0}
+.bzl .bn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+.bzl .bn em{font-style:normal;color:var(--brand)}
+.bzl .ba{font-family:var(--num);font-variant-numeric:tabular-nums}
+.bzl .bd{font-family:var(--num)}
+.bzl.off{opacity:.45;text-decoration:line-through}
+
+input[type=date]{cursor:pointer;position:relative}
+input[type=date]::-webkit-calendar-picker-indicator{display:none;-webkit-appearance:none}
+input[type=date]::-webkit-inner-spin-button{display:none}
+
+.pdd{font-family:var(--num);font-size:11.5px;font-weight:700;padding:1px 7px;border-radius:99px;background:rgba(255,255,255,.22);margin-left:6px;white-space:nowrap}
+.pdd.soon{background:var(--sun);color:#1b1f24}.pdd.late{background:var(--coral);color:#fff}
+.upa{display:block;font-size:12px;color:var(--mu);font-family:var(--num);margin-top:1px}
+.cal .ce i{font-style:normal}
+.cal .ce{font-family:var(--num);font-size:11.5px;color:var(--brand);opacity:.55;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.calsum .cel{font-size:12px;opacity:.8}
+
+/* 가계부 달력 */
+.calw{margin-top:22px}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cal .wd{font-size:12px;color:var(--mu);text-align:center;padding:4px 0}
+.cal .wd.sun{color:var(--coral)}
+.cal .dc{background:var(--bg);border-radius:10px;min-height:76px;padding:6px 7px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.cal .dc.out{opacity:.35}
+.cal .dc.today{box-shadow:inset 0 0 0 2px var(--brand)}
+.cal .dn{font-size:12.5px;font-weight:700;color:var(--ink)}
+.cal .dc.sun .dn{color:var(--coral)}
+.cal .ci,.cal .co{font-family:var(--num);font-variant-numeric:tabular-nums;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal .ci{color:var(--brand)}.cal .co{color:var(--coral)}
+.calsum{display:flex;gap:16px;font-size:13px;color:var(--mu)}
+.calsum b{font-family:var(--num)}
+@media (max-width:760px){
+  .cal{gap:2px}
+  .cal .dc{min-height:62px;padding:4px 3px;border-radius:7px}
+  .cal .ci,.cal .co,.cal .ce{font-size:10.5px;letter-spacing:-.02em}
+  .cal .ce i{display:none}
+  .cal .ce{text-decoration:underline dotted}
+  .cal .dn{font-size:11.5px}
+  .calsum{display:none}
 }
 
 /* 빠른 추가 */
@@ -749,11 +792,11 @@ function taxHTML() {
   </div>
   ${halves.map(h => `<section class="tx-sec"><h3>${h.name} ${h.lab}</h3>
     <div class="mtbl">
-      <div class="tx-r tx-h"><span>월</span><span>공급가액</span><span>부가세</span><span class="tot">합계</span><span class="cnt">건수</span></div>
-      ${h.months.map(r => `<details><summary class="tx-r"><span class="mo">${r.m}월</span><span class="num ${r.c ? "" : "zero"}">${z(r.c)}</span><span class="num v ${r.v ? "" : "zero"}">${z(r.v)}</span><span class="num tot ${r.c ? "" : "zero"}">${z(r.c + r.v)}</span><span class="num cnt ${r.n ? "" : "zero"}">${r.n || "–"}</span></summary>
+      <div class="tx-r tx-h"><span>월</span><span>공급가액</span><span>부가세</span><span class="cnt">건수</span></div>
+      ${h.months.map(r => `<details><summary class="tx-r"><span class="mo">${r.m}월</span><span class="num ${r.c ? "" : "zero"}">${z(r.c)}</span><span class="num v ${r.v ? "" : "zero"}">${z(r.v)}</span><span class="num cnt ${r.n ? "" : "zero"}">${r.n || "–"}</span></summary>
         ${r.ps.length ? `<div class="tx-d">${r.ps.map(p => `<a href="#/p/${p.id}"><span class="nm">${esc(p.name)}</span><span class="amt"><span>${won(Number(p.contract))}</span><em>부가세 ${won(vat(p))}</em></span></a>`).join("")}</div>` : ""}
       </details>`).join("")}
-      <div class="tx-r tx-t"><span class="mo">소계</span><span class="num">${won(h.c)}</span><span class="num v">${won(h.v)}</span><span class="num tot">${won(h.c + h.v)}</span><span class="num cnt">${h.n}</span></div>
+      <div class="tx-r tx-t"><span class="mo">소계</span><span class="num">${won(h.c)}</span><span class="num v">${won(h.v)}</span><span class="num cnt">${h.n}</span></div>
     </div></section>`).join("")}
   <p class="tx-note">연간 합계: 공급가액 ${won(all.c)} · 부가세 ${won(all.v)} · 합계 ${won(all.c + all.v)}</p>`;
 }
@@ -893,12 +936,32 @@ function lgCompute(r, st) {
   const pin = projects.filter(p => Number(p.received) > 0 && inR(paidOf(p), r)).map(p => ({ id: p.id, name: p.name, date: paidOf(p), amount: Number(p.received), on: st.incProj && !st.excl.includes(p.id) })).sort((a, b) => b.date.localeCompare(a.date));
   const oin = ent.filter(x => x.type === "in");
   const out = ent.filter(x => x.type !== "in");
-  const biz = expenses.filter(e => inR(e.date, r)).reduce((t, e) => t + expTot(e), 0);
+  const bizList = expenses.filter(e => inR(e.date, r)).sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  const biz = bizList.reduce((t, e) => t + expTot(e), 0);
   const INC = pin.filter(x => x.on).reduce((t, x) => t + x.amount, 0) + oin.reduce((t, x) => t + (Number(x.amount) || 0), 0);
   const LIV = out.reduce((t, x) => t + (Number(x.amount) || 0), 0);
   const OUT = LIV + (st.incBiz ? biz : 0);
   const cats = {}; out.forEach(x => { const c = x.cat || "기타"; cats[c] = (cats[c] || 0) + (Number(x.amount) || 0); });
-  return { ent, pin, oin, out, biz, INC, LIV, OUT, cats };
+  return { ent, pin, oin, out, biz, bizList, INC, LIV, OUT, cats };
+}
+const man = v => { v = Math.round(v); if (!v) return ""; if (v >= 10000) { const m = v / 10000; return (m >= 100 ? Math.round(m) : Math.round(m * 10) / 10).toLocaleString("ko-KR") + "만"; } return v.toLocaleString("ko-KR"); };
+function calHTML(r, c, st) {
+  const inc = {}, out = {}, add = (o, d, a) => { if (d) o[d] = (o[d] || 0) + (Number(a) || 0); };
+  c.pin.filter(x => x.on).forEach(x => add(inc, x.date, x.amount));
+  c.oin.forEach(x => add(inc, x.date, x.amount));
+  c.out.forEach(x => add(out, x.date, x.amount));
+  if (st.incBiz) c.bizList.forEach(e => add(out, e.date, expTot(e)));
+  const exp2 = {}; projects.filter(p => p.payDue && unpaid(p) > 0 && Number(p.contract) > 0 && inR(p.payDue, { from: "0000", to: "9999" })).forEach(p => add(exp2, p.payDue, unpaid(p)));
+  const f = pd(r.from), t = pd(r.to);
+  const start = new Date(f.getFullYear(), f.getMonth(), f.getDate() - ((f.getDay() + 6) % 7));
+  const end = new Date(t.getFullYear(), t.getMonth(), t.getDate() + (6 - (t.getDay() + 6) % 7));
+  const today = todayStr(); let cells = "";
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    const k2 = ymd(d), sun = d.getDay() === 0;
+    cells += `<div class="dc ${inR(k2, r) ? "" : "out"} ${k2 === today ? "today" : ""} ${sun ? "sun" : ""}"><span class="dn">${d.getDate()}</span>${inc[k2] ? `<span class="ci">+${man(inc[k2])}</span>` : ""}${out[k2] ? `<span class="co">−${man(out[k2])}</span>` : ""}${exp2[k2] ? `<span class="ce"><i>예정 </i>+${man(exp2[k2])}</span>` : ""}</div>`;
+  }
+  return `<div class="card calw"><h3>달력 <span class="calsum"><span style="color:var(--brand)">수입 <b>${won(c.INC)}</b></span><span style="color:var(--coral)">지출 <b>${won(c.OUT)}</b></span><span class="cel">흐린 글씨는 입금 예정</span></span></h3>
+    <div class="cal">${["월", "화", "수", "목", "금", "토", "일"].map((w, i) => `<span class="wd ${i === 6 ? "sun" : ""}">${w}</span>`).join("")}${cells}</div></div>`;
 }
 function lgHTML() {
   const st = lgSet(), r = periodOf(LG.mode, LG.anchor), c = lgCompute(r, st);
@@ -941,6 +1004,7 @@ function lgHTML() {
     <div class="card"><h3>지출 ${chartSeg}</h3>
       ${LG.chart === "pie" ? pieH(catItems, c.OUT, `${LG.mode === "week" ? "이번 주" : r.label.split(" ")[1] || r.label} 지출`) : catBars}
       <div class="li bz ${st.incBiz ? "" : "off"}"><button type="button" class="cb" data-act="lgTog" data-k="incBiz" aria-label="사업 지출 포함" aria-pressed="${st.incBiz}"></button><a class="t" href="#/expenses"><b>사업 지출</b><span>지출 탭 합계 (부가세 포함, 실제 낸 돈)</span></a><span class="a">${won(c.biz)}</span></div>
+      ${c.bizList.length ? `<div class="bzl ${st.incBiz ? "" : "off"}">${c.bizList.map(e => { const pj = e.projectId && projName(e.projectId); return `<div><span class="bd">${dt(e.date).slice(3)}</span><span class="bn">${esc(e.item || e.cat || "지출")}${pj ? ` <em>· ${esc(pj)}</em>` : ""}</span><span class="ba">${won(expTot(e))}</span></div>`; }).join("")}</div>` : ""}
       <div class="tot"><span>합계</span><b>${won(c.OUT)}</b></div></div>
   </div>
   <form class="qa2 qa-lg" id="lgf" autocomplete="off"><h3>가계부 적기</h3>
@@ -953,7 +1017,8 @@ function lgHTML() {
   </form>
   <div class="card"><h3>내역 <small>${r.label}</small></h3>
     ${recent.map(x => `<div class="li"><span class="nb"></span><span class="t"><b>${esc(x.memo || x.cat)}</b><span>${dt(x.date).slice(3)} · ${esc(x.cat || "")}</span></span><span class="a" style="color:${x.type === "in" ? "var(--brand)" : "var(--coral)"}">${x.type === "in" ? "+" : "−"}${won(x.amount)} <button type="button" class="x xs" data-act="lgDel" data-id="${x.id}" aria-label="삭제">✕</button></span></div>`).join("") || `<div class="emp2">직접 적은 내역이 없어요.</div>`}
-  </div>`;
+  </div>
+  ${calHTML(r, c, st)}`;
 }
 
 function renderMain() {
@@ -1019,10 +1084,10 @@ function hkPanel(yp) {
     return `<div class="hkp" style="--po:15;--pt:25"><h4>${title}</h4>${list.length ? list.map(p => `<a href="#/p/${p.id}"><span class="nm">${dot(p)}${esc(p.name)}</span><span>${p.due ? "납기 " + dt(p.due) : p.start ? "시작 " + dt(p.start) : ""}</span><span>${valFn(p)}</span></a>`).join("") : `<div class="emp">진행중인 프로젝트가 없어요.</div>`}</div>`;
   }
   const st = k === "ar" ? "완료" : "진행중";
-  list = yp.filter(p => p.status === st && num(p.contract) > 0 && unpaid(p) > 0).sort((a, b) => unpaid(b) - unpaid(a));
+  list = yp.filter(p => p.status === st && num(p.contract) > 0 && unpaid(p) > 0).sort((a, b) => (a.payDue ? 0 : 1) - (b.payDue ? 0 : 1) || (a.payDue || "").localeCompare(b.payDue || "") || unpaid(b) - unpaid(a));
   sum = list.reduce((t, p) => t + unpaid(p), 0);
   title = k === "ar" ? `못 받은 돈 (완료) ${list.length}건` : `받을 돈 (진행중) ${list.length}건`;
-  return `<div class="hkp" style="--po:${k === "ar" ? 25 : 35};--pt:${k === "ar" ? 25 : 45}"><h4>${title}</h4>${list.length ? list.map(p => `<a href="#/p/${p.id}"><span class="nm">${dot(p)}${esc(p.name)}</span><span>계약 ${won(num(p.contract))}</span><span>${won(unpaid(p))}</span></a>`).join("") + `<div class="sumr"><span>합계</span><span>${won(sum)}</span></div>` : `<div class="emp">${k === "ar" ? "미수금이 없어요." : "입금 예정인 금액이 없어요."}</div>`}</div>`;
+  return `<div class="hkp" style="--po:${k === "ar" ? 25 : 35};--pt:${k === "ar" ? 25 : 45}"><h4>${title}</h4>${list.length ? list.map(p => `<a href="#/p/${p.id}"><span class="nm">${dot(p)}${esc(p.name)}${p.payDue ? ` <span class="pdd ${daysTo(p.payDue) < 0 ? "late" : daysTo(p.payDue) <= 7 ? "soon" : ""}">${dt(p.payDue).slice(3)} ${daysTo(p.payDue) < 0 ? `${-daysTo(p.payDue)}일 지남` : dday(daysTo(p.payDue))}</span>` : ""}</span><span>계약 ${won(num(p.contract))}</span><span>${won(unpaid(p))}</span></a>`).join("") + `<div class="sumr"><span>합계</span><span>${won(sum)}</span></div>` : `<div class="emp">${k === "ar" ? "미수금이 없어요." : "입금 예정인 금액이 없어요."}</div>`}</div>`;
 }
 
 function renderStats() {
@@ -1088,6 +1153,7 @@ function renderHighlights() {
   const act = yp.filter(p => p.status === "진행중").sort(byDate).slice(0, 6);
   const today = todayStr();
   const up = yp.filter(p => p.due && p.due >= today && p.status !== "완료").sort((a, b) => a.due.localeCompare(b.due)).slice(0, 5);
+  const pays = projects.filter(p => p.payDue && Number(p.contract) > 0 && unpaid(p) > 0).sort((a, b) => a.payDue.localeCompare(b.payDue)).slice(0, 6);
 
   const card = p => { const d = daysTo(p.due); return `<a class="pcard" href="#/p/${p.id}" style="--c:${SCOLOR[p.status]}">
     <span class="pc-top"><span class="pc-st"><i class="dot d-${p.status}"></i>${p.status}</span>${d !== null ? `<span class="dd ${ddClass(d)}">${dday(d)}</span>` : ""}</span>
@@ -1102,6 +1168,9 @@ function renderHighlights() {
       <section class="box sec"><h3>다가오는 납기</h3>
         ${up.length ? up.map((p, i) => { const d = daysTo(p.due); return `<a class="up${i ? "" : " first"}" href="#/p/${p.id}"><span>${esc(p.name)}</span><span class="r">${dt(p.due)}<span class="dd ${ddClass(d)}">${dday(d)}</span></span></a>`; }).join("")
           : `<p class="muted" style="margin:0">납기일을 입력하면 여기에 모여요.</p>`}</section>
+      <section class="box sec"><h3>입금 예정</h3>
+        ${pays.length ? pays.map((p, i) => { const d = daysTo(p.payDue); return `<a class="up${i ? "" : " first"}" href="#/p/${p.id}"><span>${esc(p.name)}<small class="upa">${won(unpaid(p))}</small></span><span class="r">${dt(p.payDue)}<span class="dd ${d < 0 ? "late" : ddClass(d)}">${d < 0 ? `${-d}일 지남` : dday(d)}</span></span></a>`; }).join("")
+          : `<p class="muted" style="margin:0">프로젝트에 입금 예정일을 넣으면 여기에 모여요.</p>`}</section>
     </aside></div>`;
 }
 
@@ -1172,10 +1241,11 @@ function renderPane(p) {
   } else {
     el.innerHTML = `
     <section class="ps"><h3 class="sh">버짓</h3>
-      <div class="grid3">
+      <div class="grid4">
         <label class="f">계약금액(만원)<input type="number" step="any" inputmode="decimal" placeholder="예: 275.3 → 275만 3천원" data-f="contract" value="${k(p.contract)}"></label>
         <label class="f">입금액(만원)<input type="number" step="any" inputmode="decimal" placeholder="예: 275.3 → 275만 3천원" data-f="received" value="${k(p.received)}"></label>
-        <label class="f">입금일<input type="date" data-f="paidDate" value="${esc(p.paidDate || "")}"></label></div>
+        <label class="f">입금일<input type="date" data-f="paidDate" value="${esc(p.paidDate || "")}"></label>
+        <label class="f">입금 예정일<input type="date" data-f="payDue" value="${esc(p.payDue || "")}"></label></div>
       <div class="sum"><div><small>지출 합계</small><b id="b-exp"></b></div><div><small>마진</small><b id="b-margin"></b></div><div><small>미수금</small><b id="b-unpaid"></b></div></div>
       <h4>지출 항목</h4>
       <p class="exnote">지출 탭과 연결돼 있어요. 금액은 만원 단위, 마진은 부가세를 뺀 공급가액으로 계산해요. <a href="#/expenses">지출 탭 보기</a></p>
@@ -1241,6 +1311,7 @@ app.addEventListener("input", e => {
   if (t.dataset.f) {
     const f = t.dataset.f;
     p[f] = NUM.includes(f) ? (t.value === "" ? "" : Math.round(Number(t.value) * 10000)) : t.value;
+    if (f === "received" && Number(p.received) > 0 && !p.paidDate) { p.paidDate = todayStr(); const pdI = $('[data-f="paidDate"]'); if (pdI) pdI.value = p.paidDate; }
     if (NUM.includes(f)) updateBudget(p);
     persist(p);
   } else if (t.dataset.lk) {
@@ -1290,6 +1361,10 @@ app.addEventListener("submit", async e => {
   e.target.reset(); if (document.activeElement) document.activeElement.blur(); window.scrollTo({ top: 0 });
   try { await store.save("projects", np); } catch (err) { alert("저장 실패: " + (err.code || err.message)); }
 });
+app.addEventListener("click", e => {
+  const t = e.target;
+  if (t.matches && t.matches('input[type="date"]') && typeof t.showPicker === "function" && matchMedia("(pointer:fine)").matches) { try { t.showPicker(); } catch (err) {} }
+}, true);
 app.addEventListener("click", async e => {
   const b = e.target.closest("[data-act]"); if (!b) return;
   const act = b.dataset.act, p = cur(), i = +b.dataset.i;
