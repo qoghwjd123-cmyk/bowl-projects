@@ -503,7 +503,7 @@ input[type=date]::-webkit-inner-spin-button{display:none}
 .shr input[type=date]{border-left:3px solid var(--t-shoot)}
 @media (max-width:760px){.shr{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 38px}.shr [data-sh=memo]{grid-column:1/3;grid-row:2}}
 
-@media (max-width:1100px) and (min-width:761px){.qa{grid-template-columns:minmax(0,1fr) 7rem 7rem 9.5rem}.qa .nm{grid-column:1/-1}}
+@media (max-width:1100px) and (min-width:761px){#app .qa{grid-template-columns:repeat(4,minmax(0,1fr))}#app .qa .nm{grid-column:1/-1}#app .qa #qa-b{grid-column:span 3}}
 
 .plhl{margin-top:30px}
 .plqa .qa{margin-bottom:12px}
@@ -552,11 +552,12 @@ input[type=date]::-webkit-inner-spin-button{display:none}
 }
 
 /* 빠른 추가 */
-.qa{background:var(--panel);border-radius:14px;padding:14px 16px;margin:0 0 30px;display:grid;grid-template-columns:minmax(0,1fr) 7rem 7rem 9.5rem 9.5rem 7rem auto;gap:10px;align-items:end}
+.qa{background:var(--panel);border-radius:14px;padding:12px 14px;margin:0 0 30px;display:grid;grid-template-columns:minmax(0,1fr) 9rem 7rem 9rem 9rem 11rem auto;gap:8px;align-items:center}
+.qa>input,.qa>select{height:40px;width:100%;min-width:0}
 .qa label{display:block;font-size:12.5px;color:var(--mu)}
 .qa label input,.qa label select{margin-top:5px}
-.qa .btn{height:42px}
-.qa-t{grid-column:1/-1;margin:0;font-size:15px;font-weight:700}
+.qa .btn{height:40px}
+.qa-t{grid-column:1/-1;margin:0;font-size:14px;font-weight:700}
 @media (max-width:760px){
   .qa{grid-template-columns:1fr 1fr;padding:14px}
   .qa .nm,.qa .btn{grid-column:1/-1}
@@ -935,14 +936,15 @@ function render() {
   renderMain();
 }
 
+const dph = (id, ph) => `<input id="${id}" type="text" class="dph" placeholder="${ph}" aria-label="${ph}" onfocus="this.type='date';try{matchMedia('(pointer:fine)').matches&&this.showPicker()}catch(e){}" onblur="if(!this.value)this.type='text'">`;
 const qaHTML = () => `<form class="qa" id="qa" autocomplete="off">
     <h3 class="qa-t">새 프로젝트 추가</h3>
-    <label class="nm">프로젝트명<input id="qa-n" required placeholder="프로젝트명"></label>
-    <label>카테고리<select id="qa-c"><option value="">없음</option>${CATS.map(c => `<option>${c}</option>`).join("")}</select></label>
-    <label>상태<select id="qa-s">${STATUSES.map(x => `<option>${x}</option>`).join("")}</select></label>
-    <label>시작일<input id="qa-d" type="date"></label>
-    <label>촬영일<input id="qa-sh" type="date"></label>
-    <label title="275.3 입력 → 275만 3천원">버짓(만원)<input id="qa-b" type="number" step="any" inputmode="decimal" placeholder="예: 275.3"></label>
+    <input class="nm" id="qa-n" required placeholder="프로젝트명" aria-label="프로젝트명">
+    <select id="qa-c" aria-label="카테고리"><option value="">카테고리 없음</option>${CATS.map(c => `<option>${c}</option>`).join("")}</select>
+    <select id="qa-s" aria-label="상태">${STATUSES.map(x => `<option>${x}</option>`).join("")}</select>
+    ${dph("qa-d", "시작일")}
+    ${dph("qa-sh", "촬영일")}
+    <input id="qa-b" type="number" step="any" inputmode="decimal" placeholder="버짓 (만원)" aria-label="버짓 (만원)" title="275.3 입력 → 275만 3천원">
     <button class="btn" type="submit">+ 추가</button>
   </form>`;
 const isMonthly = () => location.hash === "#/monthly";
