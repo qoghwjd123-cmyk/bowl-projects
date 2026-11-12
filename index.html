@@ -509,13 +509,15 @@ input[type=date]::-webkit-inner-spin-button{display:none}
 .hmore{display:flex;justify-content:flex-end;margin-top:10px}
 .hero-more{border:0;background:rgba(255,255,255,.16);color:#fff;font-weight:600;font-size:13px;padding:7px 14px;border-radius:999px;cursor:pointer}
 .hero-more:hover{background:rgba(255,255,255,.26)}
-.hero.compact .halves,.hero.compact [data-k=ar],.hero.compact .hk-m,.hero.compact .sbar,.hero.compact .legend{display:none}
-.hero.compact .hero-kpi{grid-template-columns:1.5fr 1fr 1fr}
+.hero:not(.compact) .compact-only,.hero.compact .full-only{display:none}
+.hero.compact .halves,.hero.compact .hk-m,.hero.compact .sbar,.hero.compact .legend{display:none}
+.hero.compact .hero-kpi{grid-template-columns:1.35fr 1fr 1fr 1fr}
 .hero.compact .hero-kpi>.hk.main{grid-column:auto;padding:16px 20px}
-.hero.compact .hero-kpi>[data-k=exp]{order:10}.hero.compact .hero-kpi>[data-k=proj]{order:20}
+.hero.compact .hero-kpi>[data-k=exp]{order:10}.hero.compact .hero-kpi>[data-k=ar]{order:20}.hero.compact .hero-kpi>[data-k=proj]{order:30}
 .hero.compact .hero-kpi>.hkp{order:50}
 .hero.compact .hk .big{font-size:clamp(28px,3.6vw,40px)}
 .hero.compact .hmore{margin-top:12px}
+@media (max-width:1000px) and (min-width:761px){.hero.compact .hero-kpi{grid-template-columns:1fr 1fr}.hero.compact .hero-kpi>.hkp{order:50}}
 @media (max-width:760px){
   .hero.compact .hero-kpi{grid-template-columns:1fr}
   .hero.compact .hero-kpi>.hkp{order:var(--pc)}
@@ -1210,8 +1212,6 @@ const PL = { anchor: todayStr(), sel: null, calM: todayStr().slice(0, 7), ev: nu
 function plEvents() {
   const list = schedule.map(e => ({ ...e, auto: false }));
   projects.forEach(p => {
-    const ty = catOf(p) === "촬영" ? "shoot" : "bowl";
-    if (p.start) list.push({ id: "st_" + p.id, auto: "start", type: ty, date: p.start, time: "", title: p.name, projectId: p.id });
     (p.shoots || []).forEach((x, i) => { if (x.date) list.push({ id: `sh_${p.id}_${i}`, auto: "shoot", type: "shoot", date: x.date, time: x.time || "", title: p.name, memo: x.memo || "", projectId: p.id }); });
     const dueD = p.due || p.end;
     if (dueD && p.status !== "완료") list.push({ id: "due_" + p.id, auto: "due", type: "bowl", date: dueD, time: "", title: `${p.name} 납기`, projectId: p.id });
@@ -1224,7 +1224,7 @@ const evSort = (a, b) => (a.time ? 0 : 1) - (b.time ? 0 : 1) || (a.time || "").l
 function evCard(e) {
   const t = PTYPE[e.type] || PTYPE.bowl;
   const pj = e.projectId && projName(e.projectId);
-  const lab = e.auto === "due" ? "납기" : e.auto === "pay" ? "입금 예정" : e.auto === "start" ? "시작" : e.auto === "shoot" ? (e.time || "촬영일") : e.time || "종일";
+  const lab = e.auto === "due" ? "편집 납기" : e.auto === "pay" ? "입금 예정" : e.auto === "start" ? "시작" : e.auto === "shoot" ? (e.time || "촬영일") : e.time || "종일";
   const open = PL.ev === e.id && !e.auto;
   const title = e.auto ? esc(e.title.replace(` 납기`, "").replace(/ 입금 예정 .*/, "")) : esc(e.title) || "(내용 없음)";
   const sub = e.auto === "pay" ? esc(e.title.match(/입금 예정 (.*)$/)?.[1] || "") : e.auto === "shoot" ? esc(e.memo || "") : (pj && !e.auto ? esc(pj) : "");
@@ -1276,7 +1276,7 @@ function plHTML() {
   return `
   <div class="pl-h"><h2>${thisWeek ? "이번 주" : `${st.getMonth() + 1}월 ${wkNo}주차`}<small>${r.label}</small></h2>
     <div class="ctl"><button type="button" class="today-btn" data-act="plToday">오늘</button><div class="pnav"><button type="button" data-act="plNav" data-v="-1" aria-label="이전 주">‹</button><b>${st.getMonth() + 1}월 ${wkNo}주차</b><button type="button" data-act="plNav" data-v="1" aria-label="다음 주">›</button></div></div></div>
-  <div class="lgd"><span><i style="background:var(--t-shoot)"></i>촬영</span><span><i style="background:var(--t-bowl)"></i>보울</span><span>점선 = 프로젝트에서 자동 (시작 · 촬영일 · 납기 · 입금 예정일)</span></div>
+  <div class="lgd"><span><i style="background:var(--t-shoot)"></i>촬영</span><span><i style="background:var(--t-bowl)"></i>보울</span><span>점선 = 프로젝트에서 자동 (촬영일 · 편집 납기 · 입금 예정일)</span></div>
   <form class="qa3" id="plf" autocomplete="off"><b>일정 추가</b>
     <input type="date" name="date" value="${PL.formDate || (thisWeek ? today : r.from)}" required aria-label="날짜">
     <input name="time" inputmode="numeric" placeholder="시간 (예: 930)" maxlength="5" aria-label="시간 (비우면 종일)">
@@ -1378,13 +1378,13 @@ function hkPanel(yp) {
   if (k === "proj") {
     list = yp.filter(p => p.status === "진행중").sort((a, b) => (b.start || "").localeCompare(a.start || ""));
     title = `진행중 프로젝트 ${list.length}건`; valFn = p => num(p.contract) ? won(p.contract) : "–"; sum = null;
-    return `<div class="hkp" style="--po:15;--pt:25;--pc:25"><h4>${title}</h4>${list.length ? list.map(p => `<a href="#/p/${p.id}"><span class="nm">${dot(p)}${esc(p.name)}</span><span>${p.due ? "납기 " + dt(p.due) : p.start ? "시작 " + dt(p.start) : ""}</span><span>${valFn(p)}</span></a>`).join("") : `<div class="emp">진행중인 프로젝트가 없어요.</div>`}</div>`;
+    return `<div class="hkp" style="--po:15;--pt:25;--pc:35"><h4>${title}</h4>${list.length ? list.map(p => `<a href="#/p/${p.id}"><span class="nm">${dot(p)}${esc(p.name)}</span><span>${p.due ? "납기 " + dt(p.due) : p.start ? "시작 " + dt(p.start) : ""}</span><span>${valFn(p)}</span></a>`).join("") : `<div class="emp">진행중인 프로젝트가 없어요.</div>`}</div>`;
   }
   const st = k === "ar" ? "완료" : "진행중";
   list = yp.filter(p => p.status === st && num(p.contract) > 0 && unpaid(p) > 0).sort((a, b) => (a.payDue ? 0 : 1) - (b.payDue ? 0 : 1) || (a.payDue || "").localeCompare(b.payDue || "") || unpaid(b) - unpaid(a));
   sum = list.reduce((t, p) => t + unpaid(p), 0);
   title = k === "ar" ? `못 받은 돈 (완료) ${list.length}건` : `받을 돈 (진행중) ${list.length}건`;
-  return `<div class="hkp" style="--po:${k === "ar" ? 25 : 35};--pt:${k === "ar" ? 25 : 45};--pc:15"><h4>${title}</h4>${list.length ? list.map(p => `<a href="#/p/${p.id}"><span class="nm">${dot(p)}${esc(p.name)}${p.payDue ? ` <span class="pdd ${daysTo(p.payDue) < 0 ? "late" : daysTo(p.payDue) <= 7 ? "soon" : ""}">${dt(p.payDue).slice(3)} ${daysTo(p.payDue) < 0 ? `${-daysTo(p.payDue)}일 지남` : dday(daysTo(p.payDue))}</span>` : ""}</span><span>계약 ${won(num(p.contract))}</span><span>${won(unpaid(p))}</span></a>`).join("") + `<div class="sumr"><span>합계</span><span>${won(sum)}</span></div>` : `<div class="emp">${k === "ar" ? "미수금이 없어요." : "입금 예정인 금액이 없어요."}</div>`}</div>`;
+  return `<div class="hkp" style="--po:${k === "ar" ? 25 : 35};--pt:${k === "ar" ? 25 : 45};--pc:${k === "ar" ? 25 : 15}"><h4>${title}</h4>${list.length ? list.map(p => `<a href="#/p/${p.id}"><span class="nm">${dot(p)}${esc(p.name)}${p.payDue ? ` <span class="pdd ${daysTo(p.payDue) < 0 ? "late" : daysTo(p.payDue) <= 7 ? "soon" : ""}">${dt(p.payDue).slice(3)} ${daysTo(p.payDue) < 0 ? `${-daysTo(p.payDue)}일 지남` : dday(daysTo(p.payDue))}</span>` : ""}</span><span>계약 ${won(num(p.contract))}</span><span>${won(unpaid(p))}</span></a>`).join("") + `<div class="sumr"><span>합계</span><span>${won(sum)}</span></div>` : `<div class="emp">${k === "ar" ? "미수금이 없어요." : "입금 예정인 금액이 없어요."}</div>`}</div>`;
 }
 
 let heroFull = false; try { heroFull = localStorage.getItem("bowl_hero_full") === "1"; } catch (err) {}
@@ -1423,14 +1423,16 @@ function renderStats() {
     <div class="hero-body">
       <div class="hero-kpi">
         <div class="hk main">
-          <div class="mtot"><span class="l">${label}</span>
+          <div class="mtot full-only"><span class="l">${label}</span>
             <b class="big">${money(revenue)}</b>
             <span class="s">${revenue ? `입금 ${won(received)}` : "프로젝트의 계약금액을 입력하면 집계돼요"}</span></div>
+          ${(() => { const curH = F.year === CUR ? (new Date().getMonth() < 6 ? 1 : 2) : 0; if (!curH) return `<div class="mtot compact-only"><span class="l">${label}</span><b class="big">${money(revenue)}</b><span class="s">${revenue ? `입금 ${won(received)}` : "프로젝트의 계약금액을 입력하면 집계돼요"}</span></div>`;
+            const hp = curH === 1 ? h1 : h2; return `<div class="mtot compact-only"><span class="l">${F.year} ${curH === 1 ? "상반기 매출 · 1~6월" : "하반기 매출 · 7~12월"}</span><b class="big">${money(sumC(hp))}</b><span class="s">${hp.length}건 · 연 누적 ${won(revenue)}</span></div>`; })()}
           ${F.year ? `<div class="halves">
             <div class="hf"><span class="l">상반기 1~6월</span><b class="v">${money(sumC(h1))}</b><span class="s">${h1.length}건</span></div>
             <div class="hf"><span class="l">하반기 7~12월</span><b class="v">${money(sumC(h2))}</b><span class="s">${h2.length}건</span></div></div>` : ""}
         </div>
-        <div class="hk tap ${F.open === "proj" ? "on" : ""}" data-act="hk" data-k="proj" role="button" tabindex="0"><span class="l">프로젝트</span><b class="v">${total}<em>건</em></b><span class="s">진행 중 ${active}건</span></div>
+        <div class="hk tap ${F.open === "proj" ? "on" : ""}" data-act="hk" data-k="proj" role="button" tabindex="0"><span class="l"><span class="full-only">프로젝트</span><span class="compact-only">진행중 프로젝트</span></span><b class="v"><span class="full-only">${total}</span><span class="compact-only">${active}</span><em>건</em></b><span class="s"><span class="full-only">진행 중 ${active}건</span><span class="compact-only">전체 ${total}건</span></span></div>
         <div class="hk tap ${F.open === "ar" ? "on" : ""}" data-act="hk" data-k="ar" role="button" tabindex="0"><span class="l">미수금 · 완료</span><b class="v">${money(arDone)}</b><span class="s">${arDoneN ? `${arDoneN}건 못 받음` : "없음"}</span></div>
         <div class="hk tap ${F.open === "exp" ? "on" : ""}" data-act="hk" data-k="exp" role="button" tabindex="0"><span class="l">입금예정 · 진행중</span><b class="v">${money(arIng)}</b><span class="s">${arIngN ? `${arIngN}건 남음` : "없음"}</span></div>
         <div class="hk hk-m"><span class="l">마진</span><b class="v">${money(mar)}</b><span class="s">${marPct === null ? "-" : `마진율 ${marPct}%`}</span></div>
@@ -1715,7 +1717,7 @@ app.addEventListener("click", async e => {
       alert("로그인 실패: " + (c || (err && err.message) || err) + hint);
     });
   }
-  else if (act === "heroFull") { heroFull = !heroFull; try { localStorage.setItem("bowl_hero_full", heroFull ? "1" : "0"); } catch (err) {} if (!heroFull && F.open === "ar") F.open = ""; renderStats(); }
+  else if (act === "heroFull") { heroFull = !heroFull; try { localStorage.setItem("bowl_hero_full", heroFull ? "1" : "0"); } catch (err) {} renderStats(); }
   else if (act === "hk") { F.open = F.open === b.dataset.k ? "" : b.dataset.k; renderStats(); }
   else if (act === "logout") { flush(); if (confirm("로그아웃할까요?")) store.signOut(); }
   else if (act === "back") { flush(); location.hash = lastView || "#/"; }
