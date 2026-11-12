@@ -508,6 +508,15 @@ input[type=date]::-webkit-inner-spin-button{display:none}
 .plhl{margin-top:30px}
 .plqa .qa{margin-bottom:12px}
 
+.sum3.s2x{grid-template-columns:1fr 1fr}
+.sum3 .xsub{display:flex;flex-wrap:wrap;gap:4px 14px}
+.sum3 .xsub .whs{color:#0b7a6c}
+.pll{list-style:none;margin:8px 0 0;padding:0;font-size:12.5px}
+.pll li{display:grid;grid-template-columns:minmax(0,1fr) auto 3.2rem;gap:8px;padding:5px 0;border-top:1px solid rgba(0,0,0,.06);color:var(--mu)}
+.pll .pn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink,#222)}
+.pll .pa{font-family:var(--num);color:#8a6500;font-weight:600}.pll .pd{text-align:right}
+.pll li.more{display:block;border:0}
+@media (max-width:760px){.sum3.s2x{grid-template-columns:1fr}.sum3.s2x .pll{grid-column:1/-1}}
 .sum3.s5{grid-template-columns:repeat(5,minmax(0,1fr))}
 .sum3 .plc b{color:#8a6500}
 @media (max-width:1100px) and (min-width:761px){.sum3.s5{grid-template-columns:1fr 1fr 1fr}}
@@ -1093,6 +1102,7 @@ function exHTML() {
   const PJ = paid.filter(e => e.projectId && projName(e.projectId)).reduce((t, e) => t + expSup(e), 0);
   const WH = paid.reduce((t, e) => t + expWh(e), 0), whN = paid.filter(e => e.vat === "wh").length;
   const PLN = plan.reduce((t, e) => t + expTot(e), 0);
+  const PJT = paid.filter(e => e.projectId).reduce((t, e) => t + expTot(e), 0);
   const nCards = 3 + (whN ? 1 : 0) + (plan.length ? 1 : 0);
   const projOpts = sel => `<option value="">연결 안 함</option>${[...projects].sort((a, b) => (a.status === "완료") - (b.status === "완료") || (b.start || "").localeCompare(a.start || "")).map(p => `<option value="${p.id}" ${sel === p.id ? "selected" : ""}>${esc(p.name)}${p.status === "완료" ? " (완료)" : ""}</option>`).join("")}`;
   const catOpts = sel => EXP_CATS.map(c => `<option ${sel === c ? "selected" : ""}>${c}</option>`).join("");
@@ -1117,12 +1127,9 @@ function exHTML() {
   };
   return `
   <div class="mv-h"><h2>지출</h2>${periodCtl("ex", EX)}</div>
-  <div class="sum3 ${nCards === 4 ? "s4" : nCards === 5 ? "s5" : ""}">
-    <div class="out"><small>지출 합계 (부가세 포함)</small><b>${won(T)}</b><p>지급완료 ${paid.length}건</p></div>
-    ${plan.length ? `<div class="plc"><small>지출 예정 (${plan.length}건)</small><b>${won(PLN)}</b><p>아직 안 나간 돈 · 합계에서 제외</p></div>` : ""}
-    <div><small>매입 부가세</small><b>${won(V)}</b><p>세금 탭에서 낼 부가세 계산에 반영</p></div>
-    ${whN ? `<div class="whc"><small>원천세 3.3% (${whN}건)</small><b>${won(WH)}</b><p>지급한 다음 달 10일까지 홈택스 신고·납부</p></div>` : ""}
-    <div><small>프로젝트 연결 · 일반</small><b class="sm2">${won(PJ)} · ${won(S - PJ)}</b><p>공급가액 기준</p></div>
+  <div class="sum3 s2x">
+    <div class="out"><small>지출 · 지급완료 ${paid.length}건</small><b>${won(T)}</b><p class="xsub"><span>프로젝트 ${won(PJT)}</span><span>일반 ${won(T - PJT)}</span>${whN ? `<span class="whs">원천세 ${won(WH)} 포함 · 다음 달 10일 신고</span>` : ""}</p></div>
+    <div class="plc"><small>지출 예정 ${plan.length}건</small><b>${won(PLN)}</b>${plan.length ? `<ul class="pll">${[...plan].sort((x, y) => (x.date || "").localeCompare(y.date || "")).slice(0, 3).map(e => `<li><span class="pn">${e.projectId && projName(e.projectId) ? esc(projName(e.projectId)) : "일반"} · ${esc(e.item || "")}</span><span class="pa">${won(expTot(e))}</span><span class="pd">${dt(e.date).slice(3)}</span></li>`).join("")}${plan.length > 3 ? `<li class="more">외 ${plan.length - 3}건</li>` : ""}</ul>` : `<p>예정된 지출 없음</p>`}</div>
   </div>
   <form class="qa2 qa-ex" id="exf" autocomplete="off"><h3 class="exh">지출 추가 <span class="rseg sm3"><label><input type="radio" name="st" value="paid" checked><span>지급완료</span></label><label><input type="radio" name="st" value="plan"><span>예정</span></label></span></h3>
     <label>날짜<input type="date" name="date" value="${todayStr()}" required></label>
