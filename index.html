@@ -505,6 +505,8 @@ input[type=date]::-webkit-inner-spin-button{display:none}
 
 @media (max-width:1100px) and (min-width:761px){.qa{grid-template-columns:minmax(0,1fr) 7rem 7rem 9.5rem}.qa .nm{grid-column:1/-1}}
 
+.plhl{margin-top:30px}
+
 /* 파란 박스 접기 */
 .hmore{display:flex;justify-content:flex-end;margin-top:10px}
 .hero-more{border:0;background:rgba(255,255,255,.16);color:#fff;font-weight:600;font-size:13px;padding:7px 14px;border-radius:999px;cursor:pointer}
@@ -1298,7 +1300,8 @@ function plHTML() {
         <div class="ddl">${selList.map(evCard).join("") || `<div class="emp2">일정이 없어요.</div>`}</div>
         <button type="button" class="ghost sm" data-act="plAddDay" data-d="${PL.sel}">＋ 이 날 일정 추가</button></div>` : `<p class="tx-note" style="margin:10px 0 0">날짜를 누르면 그날 일정이 여기 아래에 보여요.</p>`}
     </div>
-  </div>`;
+  </div>
+  <div id="hl" class="plhl"></div>`;
 }
 function icsFor(e) {
   const d = e.date.replace(/-/g, ""), pj = e.projectId && projName(e.projectId);
@@ -1330,7 +1333,6 @@ function renderMain() {
   <nav class="vtabs"><a href="#/" class="${pl ? "on" : ""}">플래너</a><a href="#/dash" class="${isDash() ? "on" : ""}">대시보드</a><a href="#/monthly" class="${mv ? "on" : ""}">월별보기</a><a href="#/expenses" class="${ex ? "on" : ""}">지출</a><a href="#/ledger" class="${lg ? "on" : ""}">가계부</a><a href="#/tax" class="${tx ? "on" : ""}">세금</a></nav>
   ${pl ? `<div id="mv">${plHTML()}</div>` : mv ? `<div id="mv">${monthlyHTML()}</div>` : tx ? `<div id="mv">${taxHTML()}</div>` : ex ? `<div id="mv">${exHTML()}</div>` : lg ? `<div id="mv">${lgHTML()}</div>` : `
   <div id="stats"></div>
-  <div id="hl"></div>
   <form class="qa" id="qa" autocomplete="off">
     <h3 class="qa-t">새 프로젝트 추가</h3>
     <label class="nm">프로젝트명<input id="qa-n" required placeholder="프로젝트명"></label>
@@ -1355,6 +1357,7 @@ function renderMain() {
   </section>`}
   <footer class="foot"><div class="clap sm" aria-hidden="true"></div>${COMPANY} MediaBowl</footer>`;
   renderContent();
+  if (pl) renderHighlights();
 }
 
 const monthOfP = p => +((p.start || p.due || regOf(p) || "").slice(5, 7)) || 0;
