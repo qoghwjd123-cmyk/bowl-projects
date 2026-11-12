@@ -610,10 +610,15 @@ input[type=date]::-webkit-inner-spin-button{display:none}
 .mr .mo{font-weight:700}
 .mr .num{font-family:var(--num);font-variant-numeric:tabular-nums;font-size:14px}
 .mr .num.un{color:var(--coral);font-weight:600}
+.mr .num.pe{color:#8a6500;font-weight:600}
+.mdet .mpe{color:#8a6500;font-weight:600}.mdet .mun{color:var(--coral);font-weight:600}
+.mpd{display:inline-block;margin-left:6px;font-size:11.5px;font-weight:500;color:var(--mu);font-family:inherit}
+.mpd.late{color:var(--coral)}
+.mund .mo{color:var(--mu)}
 .mr .num.zero{color:var(--mu);opacity:.6}
 .mbar{height:10px;border-radius:5px;background:var(--soft);overflow:hidden;display:flex}
 .mbar i{display:block;height:100%}
-.mbar .r{background:var(--brand)}.mbar .u{background:var(--coral)}
+.mbar .r{background:var(--brand)}.mbar .u{background:#e2b93b}
 .mdet{background:#fafbfc;border-top:1px solid var(--line);padding:6px 20px 10px}
 .mdet a{display:grid;grid-template-columns:minmax(0,1fr) 8.5rem 8.5rem 3.5rem;column-gap:14px;padding:9px 0;text-decoration:none;color:inherit;font-size:14px;border-top:1px dashed var(--line)}
 .mdet a:first-child{border-top:0}
@@ -761,6 +766,9 @@ h4{margin:18px 0 8px;font-size:14px;font-weight:600}
   .erow .pst{grid-column:3;grid-row:1}
   .erow .x{grid-column:4;grid-row:1}
   .erow input[type=date]{grid-column:1;grid-row:2}
+  input[type=date]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;box-sizing:border-box;overflow:hidden}
+  input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
+  .erow input[type=date]{padding-left:10px;padding-right:6px}
   .erow input[type=number]{grid-column:2;grid-row:2}
   .erow select{grid-column:3/5;grid-row:2}
   .grid3{grid-template-columns:1fr 1fr}
@@ -1022,36 +1030,48 @@ function taxHTML() {
   <p class="tx-note">연간 합계: 공급가액 ${won(all.c)} · 부가세 ${won(all.v)} · 합계 ${won(all.c + all.v)}</p>`;
 }
 function monthlyHTML() {
-  const years = [...new Set([...projects.map(yearOf), CUR])].sort((a, b) => b - a);
+  const years = [...new Set([...projects.map(yearOf), ...projects.filter(p => p.payDue).map(p => +p.payDue.slice(0, 4)), CUR])].sort((a, b) => b - a);
   const yr = F.year || CUR;
   const yp = projects.filter(p => yearOf(p) === yr);
   const mOf = p => +((p.start || p.due || regOf(p) || "").slice(5, 7)) || 0;
   const num = v => Number(v) || 0;
+  const today = todayStr();
+  const pool = projects.filter(p => num(p.contract) > 0 && unpaid(p) > 0 && (p.payDue ? +p.payDue.slice(0, 4) === yr : yearOf(p) === yr));
+  const undet = pool.filter(p => !p.payDue);
+  const late = p => p.payDue && p.payDue < today;
   const rows = Array.from({ length: 12 }, (_, i) => {
-    const ps = yp.filter(p => mOf(p) === i + 1).sort(byDate);
-    return { m: i + 1, ps, c: ps.reduce((t, p) => t + num(p.contract), 0), r: ps.reduce((t, p) => t + num(p.received), 0), u: ps.reduce((t, p) => t + unpaid(p), 0) };
+    const ps = yp.filter(p => mOf(p) === i + 1);
+    const pays = pool.filter(p => p.payDue && +p.payDue.slice(5, 7) === i + 1);
+    const ids = new Set(ps.map(p => p.id));
+    const all = [...ps, ...pays.filter(p => !ids.has(p.id))].sort(byDate);
+    return { m: i + 1, ps, pays, all, c: ps.reduce((t, p) => t + num(p.contract), 0), uc: ps.reduce((t, p) => t + unpaid(p), 0), u: pays.reduce((t, p) => t + unpaid(p), 0), late: pays.some(late) };
   });
-  const tot = rows.reduce((t, r) => ({ c: t.c + r.c, r: t.r + r.r, u: t.u + r.u, n: t.n + r.ps.length }), { c: 0, r: 0, u: 0, n: 0 });
+  const tot = rows.reduce((t, r) => ({ c: t.c + r.c, u: t.u + r.u, n: t.n + r.ps.length }), { c: 0, u: 0, n: 0 });
+  const undSum = undet.reduce((t, p) => t + unpaid(p), 0);
+  const allU = tot.u + undSum;
   const mx = Math.max(1, ...rows.map(r => r.c));
   const z = v => v ? won(v) : "–";
-  const unList = yp.filter(p => unpaid(p) > 0 && num(p.contract) > 0).sort((a, b) => unpaid(b) - unpaid(a));
+  const payTag = p => p.payDue ? `<small class="mpd ${late(p) ? "late" : ""}">${dt(p.payDue).slice(3)}${late(p) ? " 지남" : ""}</small>` : `<small class="mpd">예정일 미정</small>`;
+  const unList = [...pool].sort((a, b) => (a.payDue ? 0 : 1) - (b.payDue ? 0 : 1) || (a.payDue || "").localeCompare(b.payDue || "") || unpaid(b) - unpaid(a));
   return `
   <div class="mv-h"><h2>${yr}년 월별 매출</h2>
     <select id="fyear" aria-label="연도">${years.map(y => `<option value="${y}" ${yr === y ? "selected" : ""}>${y}년</option>`).join("")}</select></div>
   <div class="mv-sum" style="grid-template-columns:repeat(2,1fr)"><div><small>연 매출 (계약금액)</small><b>${won(tot.c)}</b></div>
-    <div class="${tot.u ? "warn" : ""}"><small>미수금</small><b>${won(tot.u)}</b></div></div>
-  <div class="leg"><span><i style="background:var(--brand)"></i>계약금액</span><span><i style="background:var(--coral)"></i>미수</span><span>기준월: 시작일 → 납기 → 등록일</span></div>
+    <div class="${allU ? "warn" : ""}"><small>미수금 (입금 예정)</small><b>${won(allU)}</b></div></div>
+  <div class="leg"><span><i style="background:var(--brand)"></i>계약금액 · 시작일 기준</span><span><i style="background:#c99a00"></i>입금 예정 · 입금 예정일 기준</span><span><i style="background:var(--coral)"></i>예정일 지남</span></div>
   <div class="mtbl">
-    <div class="mh"><span>월</span><span>매출 비중</span><span>계약금액</span><span>미수</span><span>건수</span></div>
+    <div class="mh"><span>월</span><span>매출 비중</span><span>계약금액</span><span>입금 예정</span><span>건수</span></div>
     ${rows.map(r => `<details><summary class="mr"><span class="mo">${r.m}월</span>
-      <span class="mbc" style="grid-column:2"><span class="mbar" style="width:${Math.round(r.c / mx * 100)}%;min-width:${r.c ? 4 : 0}px">${r.c ? `<i class="r" style="width:${100 - Math.round(Math.min(r.u, r.c) / r.c * 100)}%"></i><i class="u" style="flex:1"></i>` : ""}</span></span>
-      <span class="num ${r.c ? "" : "zero"}">${z(r.c)}</span><span class="num ${r.u ? "un" : "zero"}">${z(r.u)}</span><span class="num cnt ${r.ps.length ? "" : "zero"}">${r.ps.length || "–"}</span></summary>
-      ${r.ps.length ? `<div class="mdet">${r.ps.map(p => `<a href="#/p/${p.id}"><span class="nm">${esc(p.name)}</span><span>${z(num(p.contract))}</span><span style="${unpaid(p) ? "color:var(--coral)" : ""}">${z(unpaid(p))}</span><span></span></a>`).join("")}</div>` : ""}
+      <span class="mbc" style="grid-column:2"><span class="mbar" style="width:${Math.round(r.c / mx * 100)}%;min-width:${r.c ? 4 : 0}px">${r.c ? `<i class="r" style="width:${100 - Math.round(Math.min(r.uc, r.c) / r.c * 100)}%"></i><i class="u" style="flex:1"></i>` : ""}</span></span>
+      <span class="num ${r.c ? "" : "zero"}">${z(r.c)}</span><span class="num ${r.u ? (r.late ? "un" : "pe") : "zero"}">${z(r.u)}</span><span class="num cnt ${r.ps.length ? "" : "zero"}">${r.ps.length || "–"}</span></summary>
+      ${r.all.length ? `<div class="mdet">${r.all.map(p => { const inC = r.ps.includes(p), inP = r.pays.includes(p); return `<a href="#/p/${p.id}"><span class="nm">${esc(p.name)}</span><span>${inC ? z(num(p.contract)) : "–"}</span><span class="${inP ? (late(p) ? "mun" : "mpe") : ""}">${inP ? won(unpaid(p)) + payTag(p) : "–"}</span><span></span></a>`; }).join("")}</div>` : ""}
     </details>`).join("")}
-    <div class="mr mt"><span class="mo">합계</span><span></span><span class="num">${won(tot.c)}</span><span class="num ${tot.u ? "un" : ""}">${won(tot.u)}</span><span class="num cnt">${tot.n}</span></div>
+    ${undet.length ? `<details><summary class="mr mund"><span class="mo">미정</span><span class="mbc" style="grid-column:2"><small class="mpd">입금 예정일 안 적은 프로젝트</small></span><span class="num zero">–</span><span class="num pe">${won(undSum)}</span><span class="num cnt">${undet.length}</span></summary>
+      <div class="mdet">${undet.map(p => `<a href="#/p/${p.id}"><span class="nm">${esc(p.name)}</span><span>${z(num(p.contract))}</span><span class="mpe">${won(unpaid(p))}</span><span></span></a>`).join("")}</div></details>` : ""}
+    <div class="mr mt"><span class="mo">합계</span><span></span><span class="num">${won(tot.c)}</span><span class="num ${allU ? "un" : ""}">${won(allU)}</span><span class="num cnt">${tot.n}</span></div>
   </div>
   <section class="unl"><h3>미수금 있는 프로젝트 ${unList.length}건</h3>
-    ${unList.length ? `<div class="mtbl">${unList.map(p => `<a href="#/p/${p.id}"><span class="nm" style="font-weight:600">${esc(p.name)}</span><span>${won(num(p.contract))}</span><span style="color:var(--coral);font-weight:600">${won(unpaid(p))}</span></a>`).join("")}</div>` : `<div class="empty" style="padding:24px">미수금이 없어요.</div>`}
+    ${unList.length ? `<div class="mtbl">${unList.map(p => `<a href="#/p/${p.id}"><span class="nm" style="font-weight:600">${esc(p.name)}${payTag(p)}</span><span>${won(num(p.contract))}</span><span style="color:var(--coral);font-weight:600">${won(unpaid(p))}</span></a>`).join("")}</div>` : `<div class="empty" style="padding:24px">미수금이 없어요.</div>`}
   </section>`;
 }
 
