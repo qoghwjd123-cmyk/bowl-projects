@@ -1289,9 +1289,6 @@ function plHTML() {
   const selList = PL.sel ? byDay(PL.sel) : [];
   const selD = PL.sel ? pd(PL.sel) : null;
   return `
-  <div class="pl-h"><h2>${thisWeek ? "이번 주" : `${st.getMonth() + 1}월 ${wkNo}주차`}<small>${r.label}</small></h2>
-    <div class="ctl"><button type="button" class="today-btn" data-act="plToday">오늘</button><div class="pnav"><button type="button" data-act="plNav" data-v="-1" aria-label="이전 주">‹</button><b>${st.getMonth() + 1}월 ${wkNo}주차</b><button type="button" data-act="plNav" data-v="1" aria-label="다음 주">›</button></div></div></div>
-  <div class="lgd"><span><i style="background:var(--t-shoot)"></i>촬영</span><span><i style="background:var(--t-bowl)"></i>보울</span><span>점선 = 프로젝트에서 자동 (촬영일 · 편집 납기 · 입금 예정일)</span></div>
   <div class="plqa">${qaHTML()}</div>
   <form class="qa3" id="plf" autocomplete="off"><b>일정 추가</b>
     <input type="date" name="date" value="${PL.formDate || (thisWeek ? today : r.from)}" required aria-label="날짜">
@@ -1300,6 +1297,9 @@ function plHTML() {
     <input class="wide" name="title" placeholder="${PL.type === "shoot" ? "예: 인터뷰 촬영" : "예: 1차 편집 공유"}" required aria-label="내용">
     <select class="wide" name="projectId" aria-label="프로젝트"><option value="">프로젝트 (선택)</option>${projects.filter(p => p.status !== "완료").map(p => `<option value="${p.id}" ${PL.newPid === p.id ? "selected" : ""}>${esc(p.name)}</option>`).join("")}</select>
     <button class="btn" type="submit">+ 추가</button></form>
+  <div class="pl-h"><h2>${thisWeek ? "이번 주" : `${st.getMonth() + 1}월 ${wkNo}주차`}<small>${r.label}</small></h2>
+    <div class="ctl"><button type="button" class="today-btn" data-act="plToday">오늘</button><div class="pnav"><button type="button" data-act="plNav" data-v="-1" aria-label="이전 주">‹</button><b>${st.getMonth() + 1}월 ${wkNo}주차</b><button type="button" data-act="plNav" data-v="1" aria-label="다음 주">›</button></div></div></div>
+  <div class="lgd"><span><i style="background:var(--t-shoot)"></i>촬영</span><span><i style="background:var(--t-bowl)"></i>보울</span><span>점선 = 프로젝트에서 자동 (촬영일 · 편집 납기 · 입금 예정일)</span></div>
   <div class="wk">${wk}</div>
   <div class="pgrid">
     <div class="card"><h3>${thisWeek ? "이번 주" : "이 주"} 요약</h3>
