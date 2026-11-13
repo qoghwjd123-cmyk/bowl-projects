@@ -165,7 +165,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .c-start,.c-due{font-family:var(--num);font-variant-numeric:tabular-nums;font-size:13px;color:var(--mu)}
 .c-set{order:6;text-align:right}
 .stb{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;line-height:1.5;white-space:nowrap}
-.stb.ok{background:#cdeee8;color:#0b7a6c}.stb.un{background:#fbdcd7;color:#b0382a}
+.stb.ok{background:#cdeee8;color:#0b7a6c}.stb.un{background:#fbdcd7;color:#b0382a}.stb.pe{background:#fff1c2;color:#8a6500}
 .c-amt{order:5;text-align:right;font-family:var(--num);font-variant-numeric:tabular-nums;font-size:14px}
 .lh .hd-7,.lh .hd-8{text-align:right}
 .c::before{display:none}
@@ -843,6 +843,10 @@ const dt = d => d ? d.slice(2).replace(/-/g, ".") : "";            // 2026-01-05
 const regOf = p => p.registered || (p.createdAt ? ymd(new Date(p.createdAt)) : "");
 const paidOf = p => p.paidDate || p.due || p.start || regOf(p);
 const yearOf = p => +((p.start || p.due || regOf(p) || String(CUR)).slice(0, 4));
+const setBadge = p => {
+  if (p.payDue) { const d = daysTo(p.payDue); return d < 0 ? `<span class="stb un">미수 D+${-d}</span>` : `<span class="stb pe">예정 ${d === 0 ? "D-day" : "D-" + d}</span>`; }
+  return p.status === "완료" ? `<span class="stb un">미수</span>` : `<span class="stb pe">예정</span>`;
+};
 const daysTo = d => d ? Math.round((new Date(d + "T00:00:00") - new Date(todayStr() + "T00:00:00")) / 86400000) : null;
 const dday = n => n === null ? "" : n === 0 ? "D-day" : n > 0 ? `D-${n}` : `D+${-n}`;
 const ddClass = n => n === null ? "" : n < 0 ? "late" : n <= 7 ? "soon" : "";
@@ -1569,7 +1573,7 @@ function renderContent() {
             ${cell("c-due", "납기", dt(p.due))}
             ${cell("c-amt", "", Number(p.contract) ? won(p.contract) : "")}
           </span>
-          ${cell("c-set", "", Number(p.contract) ? (unpaid(p) > 0 ? `<span class="stb un">미수</span>` : `<span class="stb ok">정산완료</span>`) : "")}
+          ${cell("c-set", "", Number(p.contract) ? (unpaid(p) > 0 ? setBadge(p) : `<span class="stb ok">정산완료</span>`) : "")}
         </span></a>`).join("")}</div>`;
   }
 }
