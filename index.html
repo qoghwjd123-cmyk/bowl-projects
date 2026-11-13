@@ -557,6 +557,33 @@ input[type=date]::-webkit-inner-spin-button{display:none}
 .lgeb{grid-column:1/-1;display:flex;gap:6px;justify-content:flex-end}
 .lgeb button{height:38px;padding:0 14px}
 @media (max-width:760px){.lged,.lged.in{grid-template-columns:1fr 1fr}.lged label.w{grid-column:1/-1;grid-row:1}}
+.lggb{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0 4px}
+.lggb .lnk{border:0;background:none;color:var(--brand);font:inherit;font-size:13px;cursor:pointer;padding:4px 2px}
+.lgg{border-top:1px solid var(--line)}
+.lggh{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:grid;grid-template-columns:14px minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:12px 2px;font-size:14.5px}
+.lggh:focus-visible{outline:2px solid var(--brand);outline-offset:-2px;border-radius:8px}
+.lggh .chev{width:7px;height:7px;border:solid var(--mu);border-width:0 2px 2px 0;transform:rotate(-45deg);transition:transform .15s;margin-left:2px}
+.lgg.op .lggh .chev{transform:rotate(45deg)}
+.lggh .n{font-size:12.5px;color:var(--mu)}
+.lggh .gs{font-weight:700;font-family:var(--num);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.lggh .gs small{display:block;font-size:11.5px;font-weight:600;color:#8a6500}
+.lgg.op{padding-bottom:6px}.lgg .li{padding-left:24px}
+@media (prefers-reduced-motion:reduce){.lggh .chev{transition:none}}
+.lgcal{margin-bottom:16px}.lgcal h3{display:block}.lgcal h3 small,.lgcat h3 small{font-size:12px;color:var(--mu);font-weight:500;margin-left:6px}
+.lcg{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:10px}
+.lcg .lw{text-align:center;font-size:12px;color:var(--mu);padding:4px 0;font-weight:600}
+.lcg .lw.sun,.lcg .lc.sun .dn{color:#d6453a}.lcg .lw.sat,.lcg .lc.sat .dn{color:#2f6fd6}
+.lcg .lc{all:unset;box-sizing:border-box;min-height:64px;border-radius:10px;background:#fff;padding:6px 7px;display:flex;flex-direction:column;gap:1px;min-width:0}
+.lcg .lc.sun,.lcg .lc.sat{background:#f7f8fa}
+.lcg .lc.em{background:transparent}
+.lcg .lc.has{cursor:pointer}.lcg .lc.has:hover{box-shadow:inset 0 0 0 2px var(--line)}
+.lcg .lc:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+.lcg .lc.td{box-shadow:inset 0 0 0 2px var(--brand)}
+.lcg .dn{font-size:12.5px;font-weight:600;color:var(--ink)}
+.lcg .o,.lcg .p{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right}
+.lcg .o{color:var(--coral)}.lcg .p{color:#8a6500}
+.lgg.flash{background:#fff6d6;transition:background .6s}
+@media (max-width:760px){.lcg{gap:3px}.lcg .lc{min-height:52px;padding:4px 4px}.lcg .o,.lcg .p{font-size:10.5px;letter-spacing:-.02em}.lgcal h3 small{display:block;margin:4px 0 0}}
 .sum3.s5{grid-template-columns:repeat(5,minmax(0,1fr))}
 .sum3 .plc b{color:#8a6500}
 @media (max-width:1100px) and (min-width:761px){.sum3.s5{grid-template-columns:1fr 1fr 1fr}}
@@ -1125,7 +1152,9 @@ function monthlyHTML() {
 const isExp = () => location.hash === "#/expenses";
 const isLg = () => location.hash === "#/ledger";
 const EX = { mode: "month", anchor: todayStr(), filter: "all", cat: "", edit: null };
-const LG = { mode: "month", anchor: todayStr(), filter: "all", edit: null };
+const LG = { mode: "month", anchor: todayStr(), filter: "all", edit: null, by: (() => { try { return localStorage.getItem("bowl_lg_by") || "cat"; } catch (e) { return "cat"; } })(), open: (() => { try { return JSON.parse(localStorage.getItem("bowl_lg_open") || "[]"); } catch (e) { return []; } })() };
+const lgOpenSave = () => { try { localStorage.setItem("bowl_lg_open", JSON.stringify(LG.open.slice(-60))); localStorage.setItem("bowl_lg_by", LG.by); } catch (e) {} };
+const lgOpenFor = x => { [ "c:" + lgCat(x.cat), "d:" + x.date ].forEach(k => { if (!LG.open.includes(k)) LG.open.push(k); }); lgOpenSave(); };
 const PAL = ["#3552d1", "#ff6b57", "#12a594", "#f5b800", "#7950f2", "#e64980", "#0c8599", "#868e96", "#a9746e", "#5c940d"];
 const pd = s => new Date(s + "T00:00:00");
 function periodOf(mode, anchor) {
@@ -1273,6 +1302,16 @@ function lgHTML() {
   const defD = inR(todayStr(), r) ? todayStr() : r.from;
   const cats = LG_OUT.map(c => ({ c, d: sumA(done.filter(x => lgCat(x.cat) === c)), p: sumA(plan.filter(x => lgCat(x.cat) === c)) }));
   const mxc = Math.max(1, ...cats.map(x => x.d + x.p));
+  const WD = ["일", "월", "화", "수", "목", "금", "토"];
+  const calCells = (() => { const y = +r.from.slice(0, 4), m = +r.from.slice(5, 7), first = new Date(y, m - 1, 1).getDay(), nd = new Date(y, m, 0).getDate(); let h = "";
+    for (let i = 0; i < first; i++) h += `<div class="lc em"></div>`;
+    for (let d = 1; d <= nd; d++) { const ds = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`, dw = (first + d - 1) % 7;
+      const dd = sumA(done.filter(x => x.date === ds)), pp = sumA(plan.filter(x => x.date === ds)), has = dd || pp;
+      h += `<${has ? `button type="button" data-act="lgDay" data-d="${ds}"` : "div"} class="lc ${dw === 0 ? "sun" : dw === 6 ? "sat" : ""} ${ds === todayStr() ? "td" : ""} ${has ? "has" : ""}"><span class="dn">${d}</span>${dd ? `<span class="o">${(dd / 10000).toLocaleString("ko-KR", { maximumFractionDigits: 1 })}만</span>` : ""}${pp ? `<span class="p">${(pp / 10000).toLocaleString("ko-KR", { maximumFractionDigits: 1 })}만</span>` : ""}</${has ? "button" : "div"}>`; }
+    return h; })();
+  const gkOf = x => LG.by === "date" ? "d:" + x.date : "c:" + lgCat(x.cat);
+  const groups = (LG.by === "date" ? [...new Set(shown.map(x => x.date))].sort().map(d => ({ k: "d:" + d, label: `${dt(d).slice(3)} (${WD[new Date(d + "T00:00").getDay()]})` })) : LG_OUT.map(c => ({ k: "c:" + c, label: c })))
+    .map(g => { const items = shown.filter(x => gkOf(x) === g.k); return { ...g, items, sum: items.reduce((t, x) => t + amt(x), 0), pl: items.filter(x => !lgDone(x)).reduce((t, x) => t + amt(x), 0) }; }).filter(g => g.items.length);
   const del = x => `<button type="button" class="x xs" data-act="lgDel" data-id="${x.id}" aria-label="삭제">✕</button>`;
   const edF = x => LG.edit !== x.id ? "" : `<form class="lged ${x.type === "in" ? "in" : ""}" id="lged" data-id="${x.id}" autocomplete="off">
       <label>날짜<input type="date" name="date" value="${esc(x.date || "")}" required></label>
@@ -1282,6 +1321,7 @@ function lgHTML() {
       ${x.type === "in" ? "" : `<label class="pchk"><input type="checkbox" name="plan" ${lgDone(x) ? "" : "checked"}> 예정</label>`}
       <div class="lgeb"><button type="button" class="ghost danger" data-act="lgDel" data-id="${x.id}">삭제</button><button type="button" class="ghost" data-act="lgEdit" data-id="">취소</button><button class="btn" type="submit">저장</button></div>
     </form>`;
+  const rowH = x => `<div class="li lr lo ${lgDone(x) ? "" : "lpl"} ${LG.edit === x.id ? "ed" : ""}"><button type="button" class="cb" data-act="lgDone" data-id="${x.id}" aria-label="지출 완료 체크" aria-pressed="${lgDone(x)}"></button><button type="button" class="t tbtn" data-act="lgEdit" data-id="${x.id}" title="눌러서 수정"><b>${esc(x.memo || lgCat(x.cat))}${lgDone(x) ? "" : `<em class="plt">예정</em>`}</b><span>${LG.by === "date" ? lgCat(x.cat) : dt(x.date).slice(3)}</span></button><span class="a">${won(amt(x))} ${del(x)}</span></div>${edF(x)}`;
   return `<div class="mv-h"><h2>가계부 <small class="lgsub">개인 돈 · 업무 지출과 따로</small></h2>
     <div class="ctl"><div class="pnav"><button type="button" data-act="lgNav" data-v="-1" aria-label="이전 달">‹</button><b>${r.label}</b><button type="button" data-act="lgNav" data-v="1" aria-label="다음 달">›</button></div></div></div>
   <div class="sum3 s4 lgsum">
@@ -1299,11 +1339,15 @@ function lgHTML() {
     </div>
     <div class="card"><h3>지출 <span class="ht out">${won(OUT + PLN)}</span></h3><p class="hint2">체크 = 나간 돈 · 체크 안 함 = 예정 (나가면 체크)</p>
       ${segH("lgFil", LG.filter, [["all", "전체"], ["done", "완료"], ["plan", "예정"]])}
-      ${shown.map(x => `<div class="li lr lo ${lgDone(x) ? "" : "lpl"} ${LG.edit === x.id ? "ed" : ""}"><button type="button" class="cb" data-act="lgDone" data-id="${x.id}" aria-label="지출 완료 체크" aria-pressed="${lgDone(x)}"></button><button type="button" class="t tbtn" data-act="lgEdit" data-id="${x.id}" title="눌러서 수정"><b>${esc(x.memo || lgCat(x.cat))}${lgDone(x) ? "" : `<em class="plt">예정</em>`}</b><span>${dt(x.date).slice(3)} · ${lgCat(x.cat)}</span></button><span class="a">${won(amt(x))} ${del(x)}</span></div>${edF(x)}`).join("") || `<div class="emp2">${LG.filter === "plan" ? "예정된 지출이 없어요." : LG.filter === "done" ? "체크한 지출이 없어요." : "이번 달 지출을 적어보세요."}</div>`}
+      <div class="lggb">${segH("lgGrpBy", LG.by, [["cat", "항목별"], ["date", "날짜별"]])}${groups.length > 1 ? `<button type="button" class="lnk" data-act="lgGrpAll">${groups.every(g => LG.open.includes(g.k)) ? "모두 접기" : "모두 펼치기"}</button>` : ""}</div>
+      ${groups.map(g => { const op = LG.open.includes(g.k); return `<div class="lgg ${op ? "op" : ""}"><button type="button" class="lggh" data-act="lgGrp" data-k="${g.k}" aria-expanded="${op}"><i class="chev"></i><b>${g.label}</b><span class="n">${g.items.length}건</span><span class="gs">${won(g.sum)}${g.pl ? `<small>예정 ${won(g.pl)}</small>` : ""}</span></button>${op ? g.items.map(rowH).join("") : ""}</div>`; }).join("") || `<div class="emp2">${LG.filter === "plan" ? "예정된 지출이 없어요." : LG.filter === "done" ? "체크한 지출이 없어요." : "이번 달 지출을 적어보세요."}</div>`}
       <form class="lgadd lgo" id="lgout" autocomplete="off"><input type="date" name="date" value="${defD}" required aria-label="날짜"><select name="cat" aria-label="항목">${LG_OUT.map(c => `<option>${c}</option>`).join("")}</select><input name="memo" placeholder="내용 (선택)" aria-label="내용"><input name="amount" type="number" step="any" inputmode="decimal" placeholder="만원" required aria-label="금액(만원)"><label class="pchk"><input type="checkbox" name="plan"> 예정</label><button class="btn" type="submit" aria-label="지출 추가">+</button></form>
       <div class="tot"><span>합계</span><b>${won(OUT + PLN)}</b></div>
       <div class="tot2"><span>나간 돈 (체크)</span><span>${won(OUT)}</span></div><div class="tot2"><span>예정</span><span>${won(PLN)}</span></div>
     </div>
+  </div>
+  <div class="card lgcal"><h3>지출 달력 <small>빨강 = 나간 돈 · 노랑 = 예정 · 날짜를 누르면 그날 지출이 펼쳐져요</small></h3>
+    <div class="lcg">${WD.map((w, i) => `<div class="lw ${i === 0 ? "sun" : i === 6 ? "sat" : ""}">${w}</div>`).join("")}${calCells}</div>
   </div>
   <div class="card lgcat"><h3>항목별 지출 <small>${r.label} · 진한 막대 = 나간 돈, 연한 막대 = 예정</small></h3>
     ${cats.map(x => `<div class="lcat"><span>${x.c}</span><span class="bg"><i style="width:${x.d / mxc * 100}%"></i><i class="p" style="width:${x.p / mxc * 100}%"></i></span><span class="a">${x.d + x.p ? won(x.d + x.p) : "–"}${x.p ? `<small>예정 ${won(x.p)}</small>` : ""}</span></div>`).join("")}
@@ -1784,6 +1828,7 @@ app.addEventListener("submit", async e => {
     const a2 = Math.round((Number(f.amount.value) || 0) * 10000); if (!a2) return;
     x.date = f.date.value || x.date; x.memo = f.memo.value.trim(); x.amount = a2;
     if (f.cat) x.cat = f.cat.value; if (f.plan) x.done = !f.plan.checked;
+    if (x.type !== "in") lgOpenFor(x);
     LG.edit = null; if (!inR(x.date, periodOf("month", LG.anchor))) LG.anchor = x.date;
     if (document.activeElement) document.activeElement.blur();
     renderMain();
@@ -1793,7 +1838,7 @@ app.addEventListener("submit", async e => {
   if (e.target.id === "lgin" || e.target.id === "lgout") {
     e.preventDefault(); const f = e.target, isIn = f.id === "lgin";
     const x = { id: uid(), type: isIn ? "in" : "out", date: f.date.value || todayStr(), cat: isIn ? "기타 수입" : f.cat.value, memo: f.memo.value.trim(), amount: Math.round((Number(f.amount.value) || 0) * 10000), createdAt: Date.now() };
-    if (!isIn) x.done = !f.plan.checked;
+    if (!isIn) { x.done = !f.plan.checked; lgOpenFor(x); }
     if (!x.amount) return;
     ledger.push(x);
     if (!inR(x.date, periodOf("month", LG.anchor))) LG.anchor = x.date;
@@ -1867,6 +1912,10 @@ app.addEventListener("click", async e => {
   }
   else if (act === "lgNav") { LG.anchor = shiftAnchor("month", LG.anchor, +b.dataset.v); renderMain(); }
   else if (act === "lgEdit") { LG.edit = b.dataset.id && LG.edit !== b.dataset.id ? b.dataset.id : null; renderMain(); }
+  else if (act === "lgDay") { const d2 = b.dataset.d; LG.by = "date"; LG.filter = "all"; if (!LG.open.includes("d:" + d2)) LG.open.push("d:" + d2); lgOpenSave(); renderMain(); const g2 = document.querySelector(`.lggh[data-k="d:${d2}"]`); if (g2) { g2.scrollIntoView({ block: "center", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); g2.parentElement.classList.add("flash"); setTimeout(() => g2.parentElement && g2.parentElement.classList.remove("flash"), 1200); } }
+  else if (act === "lgGrpBy") { LG.by = b.dataset.v; lgOpenSave(); renderMain(); }
+  else if (act === "lgGrp") { const k2 = b.dataset.k; LG.open = LG.open.includes(k2) ? LG.open.filter(x => x !== k2) : [...LG.open, k2]; lgOpenSave(); renderMain(); }
+  else if (act === "lgGrpAll") { const ks = [...document.querySelectorAll(".lggh")].map(x => x.dataset.k); const all = ks.every(k2 => LG.open.includes(k2)); LG.open = all ? LG.open.filter(k2 => !ks.includes(k2)) : [...new Set([...LG.open, ...ks])]; lgOpenSave(); renderMain(); }
   else if (act === "lgFil") { LG.filter = b.dataset.v; renderMain(); }
   else if (act === "lgDone") { const x = ledger.find(y => y.id === b.dataset.id); if (!x) return; x.done = !lgDone(x); store.save("ledger", x).catch(() => {}); renderMain(); }
   else if (act === "lgEx") { const st = lgSet(); const ex2 = st.excl.includes(b.dataset.id) ? st.excl.filter(x => x !== b.dataset.id) : [...st.excl, b.dataset.id]; saveLgSet({ excl: ex2 }); }
