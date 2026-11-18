@@ -998,7 +998,7 @@ async function firebaseStore() {
 /* ================= 상태 ================= */
 const app = $("#app");
 let store, user = null, projects = [], expenses = [], ledger = [], schedule = [], todos = [], lastView = "#/", ready = false, gotExp = false, gotLg = false, migrating = false;
-const F = { q: "", cat: "", hideDone: false, h1: false, h2: false, year: CUR, open: "" };
+const F = { q: "", cat: "", hideDone: false, h1: false, h2: false, year: CUR, open: "", hideAmt: (() => { try { return localStorage.getItem("bowl_hide_amt") === "1"; } catch (e) { return false; } })() };
 let detailTab = "main";
 const pending = new Map();
 const expPending = new Map();
@@ -1492,6 +1492,7 @@ function renderMain() {
       <label><input type="checkbox" id="fh1" ${F.h1 ? "checked" : ""}> 상반기</label>
       <label><input type="checkbox" id="fh2" ${F.h2 ? "checked" : ""}> 하반기</label>
       <label><input type="checkbox" id="fdone" ${F.hideDone ? "checked" : ""}> 완료 숨기기</label>
+      <label><input type="checkbox" id="famt" ${F.hideAmt ? "checked" : ""}> 계약금액 숨기기</label>
     </div>
     <div id="content"></div>
   </section>`}
@@ -1644,7 +1645,7 @@ function renderContent() {
     list.sort((a, b) => (a.start ? 0 : 1) - (b.start ? 0 : 1) || (a.start && b.start ? b.start.localeCompare(a.start) : (b.createdAt || 0) - (a.createdAt || 0)));
     const cell = (cls, label, val) => `<span class="c ${cls}${val ? "" : " e"}" data-l="${label}">${val || ""}</span>`;
     c.innerHTML = `<div class="tbl">
-      <div class="lh"><span class="hd-5">시작일</span><span class="hd-1">프로젝트</span><span class="hd-2">카테고리</span><span class="hd-3">상태</span><span class="hd-6">납기</span><span class="hd-7">계약금액</span><span class="hd-8">정산</span></div>
+      <div class="lh"><span class="hd-5">시작일</span><span class="hd-1">프로젝트</span><span class="hd-2">카테고리</span><span class="hd-3">상태</span><span class="hd-6">납기</span><span class="hd-7">${F.hideAmt ? "" : "계약금액"}</span><span class="hd-8">정산</span></div>
       ${list.map(p => `<a class="row" href="#/p/${p.id}">
         <span class="c c-n"><i class="cd cd${catOf(p) ? CATS.indexOf(catOf(p)) : "n"}"></i>${esc(p.name)}</span>
         <span class="m">
@@ -1653,7 +1654,7 @@ function renderContent() {
           <span class="m2">
             ${cell("c-start", "시작", dt(p.start))}
             ${cell("c-due", "납기", dt(p.due))}
-            ${cell("c-amt", "", Number(p.contract) ? won(p.contract) : "")}
+            ${cell("c-amt", "", Number(p.contract) && !F.hideAmt ? won(p.contract) : "")}
           </span>
           ${cell("c-set", "", Number(p.contract) ? (unpaid(p) > 0 ? setBadge(p) : `<span class="stb ok">정산완료</span>`) : "")}
         </span></a>`).join("")}</div>`;
@@ -1790,6 +1791,7 @@ app.addEventListener("change", e => {
   else if (t.id === "fh1") { F.h1 = t.checked; renderContent(); }
   else if (t.id === "fh2") { F.h2 = t.checked; renderContent(); }
   else if (t.id === "fdone") { F.hideDone = t.checked; renderContent(); }
+  else if (t.id === "famt") { F.hideAmt = t.checked; try { localStorage.setItem("bowl_hide_amt", t.checked ? "1" : "0"); } catch (e) {} renderContent(); }
   else if (t.id === "fyear") { F.year = +t.value; isMonthly() || isTax() ? renderMain() : renderContent(); }
 });
 
