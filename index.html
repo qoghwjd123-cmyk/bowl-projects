@@ -1972,7 +1972,13 @@ app.addEventListener("drop", e => {
 });
 app.addEventListener("dragend", () => { dragId = null; document.querySelectorAll(".col.over").forEach(x => x.classList.remove("over")); });
 
-addEventListener("hashchange", () => { flush(); viewDirty = false; render(); });
+const scrollMem = {}; let curHash = location.hash;
+addEventListener("hashchange", () => {
+  scrollMem[curHash] = window.scrollY; curHash = location.hash;
+  flush(); viewDirty = false; render();
+  const y = routeId() ? 0 : (scrollMem[curHash] || 0);
+  requestAnimationFrame(() => window.scrollTo(0, y));
+});
 
 /* ================= 시작 ================= */
 function onData(list) {
